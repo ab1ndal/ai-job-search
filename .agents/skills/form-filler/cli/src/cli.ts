@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { runClick } from "./commands/click.js"
 import { runClose } from "./commands/close.js"
 import { runFill } from "./commands/fill.js"
 import { runSnapshot } from "./commands/snapshot.js"
@@ -44,6 +45,14 @@ async function main(): Promise<number> {
       return 1
     }
     return runUpload({ selector: argv[1], filePath: argv[2] })
+  }
+
+  if (cmd === "click") {
+    if (!argv[1]) {
+      writeError("click requires a <selector>", "NO_SELECTOR")
+      return 1
+    }
+    return runClick({ selector: argv[1] })
   }
 
   if (cmd === "close") {
