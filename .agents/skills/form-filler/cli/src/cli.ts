@@ -2,6 +2,7 @@
 import { runClose } from "./commands/close.js"
 import { runFill } from "./commands/fill.js"
 import { runSnapshot } from "./commands/snapshot.js"
+import { runUpload } from "./commands/upload.js"
 import { writeError } from "./helpers.js"
 
 const HELP = `form-filler-cli — drive a browser through an online application form
@@ -35,6 +36,14 @@ async function main(): Promise<number> {
       return 1
     }
     return runFill({ mapPath: argv[1] })
+  }
+
+  if (cmd === "upload") {
+    if (!argv[1] || !argv[2]) {
+      writeError("upload requires <selector> <file-path>", "BAD_ARGS")
+      return 1
+    }
+    return runUpload({ selector: argv[1], filePath: argv[2] })
   }
 
   if (cmd === "close") {
