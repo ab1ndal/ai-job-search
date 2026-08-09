@@ -38,6 +38,7 @@ CONVERTED_FILES: list[str] = [
     ".claude/commands/rank.md",
     ".claude/skills/job-scraper/SKILL.md",
     ".claude/skills/upskill/SKILL.md",
+    ".claude/commands/apply.md",
 ]
 
 

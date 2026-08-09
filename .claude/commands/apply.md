@@ -4,11 +4,11 @@ You are orchestrating a two-agent job application workflow. The job posting is p
 
 Follow these steps **exactly in order**. Do not skip steps.
 
-**Standing rule — write new facts back to the profile.** If the user confirms, corrects or supplies a fact that is not already in `01-candidate-profile.md` — a metric, a project detail, a skill, a scope correction — update that file in the same turn. Do not leave it living only in the conversation or in a draft.
+**Standing rule — write new facts back to the profile.** If the user confirms, corrects or supplies a fact that is not already in `profiles/<name>/skills/01-candidate-profile.md` — a metric, a project detail, a skill, a scope correction — update that file in the same turn. Do not leave it living only in the conversation or in a draft.
 
 This is not bookkeeping. A fact that exists only in chat **will be treated as unsupported by a later session and stripped from drafts as a fabrication.** Anything absent from the sources does not exist as far as future drafting is concerned, and the loss is silent — a real achievement quietly disappears from every subsequent CV.
 
-This rule is the input side of the Step 3 Factual Grounding Audit, not a competitor to it. The audit is deliberately strict: an ungrounded claim is removed, and it cannot tell a fabrication from a real fact the user stated out loud last week. That strictness is correct, and it is exactly why confirmed facts have to reach the sources in the same turn they surface. Write to `01-candidate-profile.md` specifically — it is one of the audit's three sources, so a fact recorded there is grounded on the next run. Adding a fact to `01` that `CLAUDE.md` and the master CV simply do not mention is an absence, not a contradiction, and does not trip the audit's profile-consistency warning; if the new fact *corrects* something either of those states, fix it there too rather than leaving the two sources disagreeing.
+This rule is the input side of the Step 3 Factual Grounding Audit, not a competitor to it. The audit is deliberately strict: an ungrounded claim is removed, and it cannot tell a fabrication from a real fact the user stated out loud last week. That strictness is correct, and it is exactly why confirmed facts have to reach the sources in the same turn they surface. Write to `profiles/<name>/skills/01-candidate-profile.md` specifically — it is one of the audit's three sources, so a fact recorded there is grounded on the next run. Adding a fact to `01` that `CLAUDE.md` and the master CV simply do not mention is an absence, not a contradiction, and does not trip the audit's profile-consistency warning; if the new fact *corrects* something either of those states, fix it there too rather than leaving the two sources disagreeing.
 
 **Token-efficiency rules for this workflow:**
 - Never re-Read a file whose contents are already in your context from an earlier step. If you read it in Step 1, it is still available in Step 2.
@@ -19,6 +19,10 @@ This rule is the input side of the Step 3 Factual Grounding Audit, not a competi
 ---
 
 ## Step 0: Parse Input
+
+**Profile:** resolve the active candidate profile per `.claude/PROFILES.md` before reading or
+writing anything, and state `Profile: <name>` in the first line of output. `<name>` in the paths
+below is that resolved profile.
 
 - If `$ARGUMENTS` looks like a URL, use `WebFetch` to retrieve the job posting content.
 - **If the fetch returns HTTP 403, or the content is a login wall or an unrelated listing page, do not give up and do not draft from the title.** Follow the escalation order in `.claude/skills/job-application-assistant/09-web-research.md`: retry with browser headers via curl, then search for the employer's own careers posting. Most corporate and bank sites reject WebFetch's user agent while serving the page normally to a browser.
@@ -33,8 +37,8 @@ This rule is the input side of the Step 3 Factual Grounding Audit, not a competi
 ## Step 1: DRAFTER - Evaluate Fit
 
 Read the evaluation framework:
-- `.claude/skills/job-application-assistant/04-job-evaluation.md`
-- `.claude/skills/job-application-assistant/01-candidate-profile.md`
+- `profiles/<name>/skills/04-job-evaluation.md`
+- `profiles/<name>/skills/01-candidate-profile.md`
 
 Using the framework from `04-job-evaluation.md`, evaluate the job posting against the candidate's profile. If the salary lookup tool is configured, run:
 
@@ -64,32 +68,32 @@ After presenting the evaluation, ask the user:
 You already have `01-candidate-profile.md` and `04-job-evaluation.md` in context from Step 1. **Do not re-read them.**
 
 Read only the reference files you do not yet have:
-- `.claude/skills/job-application-assistant/03-writing-style.md`
+- `profiles/<name>/skills/03-writing-style.md`
 - `.claude/skills/job-application-assistant/05-cv-templates.md`
 - `.claude/skills/job-application-assistant/06-cover-letter-templates.md`
 
 **Resolve the active template (do this once, reuse everywhere below):** if `05-cv-templates.md` or `06-cover-letter-templates.md` opens with an `ACTIVE-TEMPLATE` managed block (inserted by `/add-template`), read its declared **source extension** and **compile command** — these override the stock `.tex`/lualatex (CV) and `.tex`/xelatex (cover letter) defaults for the rest of this workflow. Call these `<CV_EXT>`/`<CV_COMPILE>` and `<COVER_EXT>`/`<COVER_COMPILE>`; where no block is present, they default to `.tex`, the stock lualatex command, and the stock xelatex command respectively. Every `.tex` reference below is really `<CV_EXT>` or `<COVER_EXT>` — stock behavior is unchanged, this only matters when a custom template is active.
 
 Also read the most recent existing CV and cover letter files for concrete structural reference (one of each is enough):
-- Read any existing `cv/main_*<CV_EXT>` file as a structural reference
-- Read any existing `cover_letters/cover_*<COVER_EXT>` or `cover_letters/Cover_*<COVER_EXT>` file as a structural reference
+- Read any existing `profiles/<name>/cv/main_*<CV_EXT>` file as a structural reference
+- Read any existing `profiles/<name>/cover_letters/cover_*<COVER_EXT>` or `profiles/<name>/cover_letters/Cover_*<COVER_EXT>` file as a structural reference
 
-*The master candidate profile (`01-candidate-profile.md`), the master CV (`cv/main_example.tex`), and CLAUDE.md's Candidate Profile section are the sole source of truth for facts; existing tailored CVs may be read for structure and phrasing only, never as a source of claims.*
+*The master candidate profile (`profiles/<name>/skills/01-candidate-profile.md`), the master CV (`cv/main_example.tex`), and CLAUDE.md's Candidate Profile section are the sole source of truth for facts; existing tailored CVs may be read for structure and phrasing only, never as a source of claims.*
 
 ### Requirement coverage (both documents)
 - **Every requirement the posting states gets addressed - matched or honestly gapped, never silently omitted.** A stated requirement the candidate lacks (a tool, a clearance, years of experience) is acknowledged with an honest bridge ("not in my daily toolkit yet; a natural extension of X"), because omission reads as hiding once an interviewer asks. Build the requirement list from Step 1 and check both drafts against it before Step 3.
 - **Engage nice-to-haves by name** where the profile supports honest adjacency (e.g. "conceptually aligned with <named tool>"), and use the posting's own term over a synonym wherever it is truthfully applicable - including in CV section headings (a posting hiring for "MLOps" should find a heading containing "MLOps", not only a paraphrase).
 - **Address stated logistics and prerequisites** in the cover letter where the posting raises them: security clearance willingness, start date or availability, commute or location fit, and the posting's reference/job ID where one exists. When the employer operates across several countries, a truthful language-capabilities sentence mapped to their footprint is high-value targeting.
 
-### CV (`cv/main_<company>_<role><CV_EXT>`)
+### CV (`profiles/<name>/cv/main_<company>_<role><CV_EXT>`)
 - In the **CV language from the profile** (the `CV language:` line in CLAUDE.md's Identity section). When the profile does not set one, default to **English**. Never switch language per posting - the CV language is a profile-level choice, so all CVs stay consistent and reusable
 - Follow the moderncv/banking format from `05-cv-templates.md`
 - Tailor the profile statement and experience bullets to the specific role
 - Reframe skills and achievements to match job requirements
 - Keep to 2 pages
-- **Grounding Audit:** Before writing to disk, audit all tailored bullet points against the union of three sources: `.claude/skills/job-application-assistant/01-candidate-profile.md` + the master CV (`cv/main_example.tex`) + `CLAUDE.md`'s Candidate Profile section to verify that all dates, roles, and metrics match exactly (zero profile drift or fabrication).
+- **Grounding Audit:** Before writing to disk, audit all tailored bullet points against the union of three sources: `profiles/<name>/skills/01-candidate-profile.md` + the master CV (`cv/main_example.tex`) + `CLAUDE.md`'s Candidate Profile section to verify that all dates, roles, and metrics match exactly (zero profile drift or fabrication).
 
-### Cover Letter (`cover_letters/cover_<company>_<role><COVER_EXT>`)
+### Cover Letter (`profiles/<name>/cover_letters/cover_<company>_<role><COVER_EXT>`)
 - **Match the language of the job posting** (Danish posting -> Danish cover letter, English posting -> English cover letter)
 - Follow the structure from `06-cover-letter-templates.md`
 - Use the `cover.cls` template
@@ -125,26 +129,26 @@ Use WebSearch and WebFetch to research, starting **only** from the company ident
 
 ### 2. Read Reference Materials (content-critique only)
 Read these reference files — and only these — to ground your critique:
-- `.claude/skills/job-application-assistant/01-candidate-profile.md`
-- `.claude/skills/job-application-assistant/02-behavioral-profile.md` — use this specifically to check whether the cover letter's voice matches the candidate's natural register. A "Collaborator" PI profile, for example, should not be given a combative, solo-hero tone; a "Persuader" profile should not be given over-hedged, apologetic phrasing.
-- `.claude/skills/job-application-assistant/03-writing-style.md`
-- `.claude/skills/job-application-assistant/04-job-evaluation.md`
+- `profiles/<name>/skills/01-candidate-profile.md`
+- `profiles/<name>/skills/02-behavioral-profile.md` — use this specifically to check whether the cover letter's voice matches the candidate's natural register. A "Collaborator" PI profile, for example, should not be given a combative, solo-hero tone; a "Persuader" profile should not be given over-hedged, apologetic phrasing.
+- `profiles/<name>/skills/03-writing-style.md`
+- `profiles/<name>/skills/04-job-evaluation.md`
 - The master CV baseline template (`cv/main_example.tex`)
 - The workspace root `CLAUDE.md` file (specifically the Candidate Profile section)
 
 Do NOT read `05-cv-templates.md` or `06-cover-letter-templates.md` — those govern template structure the drafter already applied and are not needed for content critique.
 
 ### 3. Factual Grounding Audit
-Compare every date, employer, job title, and quantitative metric in both drafts against the union of three sources: `.claude/skills/job-application-assistant/01-candidate-profile.md` + the master CV baseline template (`cv/main_example.tex`) + `CLAUDE.md`'s Candidate Profile section. A claim is grounded if ANY of these sources supports it. Mismatches between these three sources themselves must be reported to the user as a profile-consistency warning rather than treated as draft drift. Draft mismatches must be flagged as Part A edits with `"reason": "grounding"` so they can be distinguished from style changes. Keep the tolerance honest: reframed emphasis is fine; changed facts and escalated numbers are not.
+Compare every date, employer, job title, and quantitative metric in both drafts against the union of three sources: `profiles/<name>/skills/01-candidate-profile.md` + the master CV baseline template (`cv/main_example.tex`) + `CLAUDE.md`'s Candidate Profile section. A claim is grounded if ANY of these sources supports it. Mismatches between these three sources themselves must be reported to the user as a profile-consistency warning rather than treated as draft drift. Draft mismatches must be flagged as Part A edits with `"reason": "grounding"` so they can be distinguished from style changes. Keep the tolerance honest: reframed emphasis is fine; changed facts and escalated numbers are not.
 
 ### 4. Drafts to Review
 Both drafts are provided inline below. Do NOT use the Read tool on the draft files — use these exact texts.
 
-<CV_DRAFT file="cv/main_<COMPANY>_<ROLE><CV_EXT>">
+<CV_DRAFT file="profiles/<name>/cv/main_<COMPANY>_<ROLE><CV_EXT>">
 <INSERT_CV_DRAFT_HERE>
 </CV_DRAFT>
 
-<COVER_LETTER_DRAFT file="cover_letters/cover_<COMPANY>_<ROLE><COVER_EXT>">
+<COVER_LETTER_DRAFT file="profiles/<name>/cover_letters/cover_<COMPANY>_<ROLE><COVER_EXT>">
 <INSERT_COVER_LETTER_DRAFT_HERE>
 </COVER_LETTER_DRAFT>
 
@@ -161,7 +165,7 @@ Return your feedback in **two parts**:
 A JSON array of concrete edits the drafter can apply directly without re-reading the files. Each edit is an object:
 ```json
 {
-  "file": "cv/main_<COMPANY>_<ROLE><CV_EXT>" | "cover_letters/cover_<COMPANY>_<ROLE><COVER_EXT>",
+  "file": "profiles/<name>/cv/main_<COMPANY>_<ROLE><CV_EXT>" | "profiles/<name>/cover_letters/cover_<COMPANY>_<ROLE><COVER_EXT>",
   "old_string": "<exact text currently in the draft>",
   "new_string": "<replacement text>",
   "reason": "<one-line rationale: keyword match / company angle / reframing / style / grounding>"
@@ -174,7 +178,7 @@ Prose suggestions grouped by category. Produce each category even if your findin
 - **Missed keywords/requirements** — what to add and roughly where, if it cannot be expressed as a clean string replacement
 - **Company/department-specific angles** — connections between experience and the company's strategic priorities, based on your research
 - **Action-oriented reframing** — identify passive, generic, or low-energy statements and suggest action-oriented rewrites. Use this category especially for structural weakness that doesn't fit a single-sentence swap (e.g., "the whole opening paragraph reads as passive — restructure around your single strongest match to the posting").
-- **Tone and style issues** — check against `03-writing-style.md` AND `02-behavioral-profile.md`. Flag any issues with tone, formality, or voice (cliches, hedging, over-humility, inconsistent register), and specifically flag any mismatch between the letter's voice and the candidate's natural register as described in the behavioral profile.
+- **Tone and style issues** — check against `profiles/<name>/skills/03-writing-style.md` AND `profiles/<name>/skills/02-behavioral-profile.md`. Flag any issues with tone, formality, or voice (cliches, hedging, over-humility, inconsistent register), and specifically flag any mismatch between the letter's voice and the candidate's natural register as described in the behavioral profile.
 
 **CRITICAL RULE:** All suggestions must be grounded in actual profile data. Do NOT suggest fabricating skills, experience, or achievements. If a requirement is a gap, say so honestly and suggest how to frame adjacent experience instead.
 
@@ -225,13 +229,13 @@ If either compile fails, fix the error and re-compile until clean.
 
 Read both PDFs via the Read tool and verify:
 
-**CV (`cv/main_<company>_<role>.pdf`):**
+**CV (`profiles/<name>/cv/main_<company>_<role>.pdf`):**
 - [ ] Exactly 2 pages (not 1, not 3)
 - [ ] No orphaned `\cventry` titles — a job/education title line must never sit alone at the bottom of page 1 with its bullets on page 2. This is the most common failure.
 - [ ] Section headings are not isolated at the top of page 2 with only 1-2 lines below
 - [ ] No awkward whitespace gaps
 
-**Cover letter (`cover_letters/cover_<company>_<role>.pdf`):**
+**Cover letter (`profiles/<name>/cover_letters/cover_<company>_<role>.pdf`):**
 - [ ] Exactly 1 page
 - [ ] Signature block visible, not cut off or pushed to a second page
 - [ ] Bullet list font matches surrounding body text (both should be Raleway-Medium)
@@ -306,8 +310,8 @@ Summarize 3-5 key decisions made to tailor the application:
 
 ### Files Created
 List the files written:
-- `cv/main_<company>_<role><CV_EXT>`
-- `cover_letters/cover_<company>_<role><COVER_EXT>`
+- `profiles/<name>/cv/main_<company>_<role><CV_EXT>`
+- `profiles/<name>/cover_letters/cover_<company>_<role><COVER_EXT>`
 
 Tell the user: "Both files are ready for your review. Open them to check the final output before compiling."
 
@@ -315,7 +319,7 @@ Tell the user: "Both files are ready for your review. Open them to check the fin
 
 Do this before the optional offer below, and before ending the turn for any other reason.
 
-1. Read `job_search_tracker.csv`. If it does not exist, create it with the standard header (identical to `/outcome` Step 1.1, so the two commands never diverge):
+1. Read `profiles/<name>/tracker.csv`. If it does not exist, create it with the standard header (identical to `/outcome` Step 1.1, so the two commands never diverge):
    ```
    date,company,sector,role,role_type,channel,status,contact_person,fit_rating,notes,cv_file,cover_letter_file,source
    ```
@@ -334,7 +338,7 @@ Do this before the optional offer below, and before ending the turn for any othe
 
 4. **Updating an open row: never move it backwards.** Refresh `cv_file`, `cover_letter_file`, `fit_rating` and `source`, and append an undated `redrafted` marker to `notes` (undated deliberately — `/outcome` reads the latest *dated* note as the last contact with the employer, and re-drafting a CV is not that). Leave `status` alone, and leave `date` alone unless the status is still `drafted`, in which case it becomes today.
 5. Never restructure the CSV, reorder rows, or touch other rows.
-6. **Do not modify `job_scraper/seen_jobs.json`.** Dedup runs off the tracker instead: `/rank` builds its exclusion set from company+role there regardless of status.
+6. **Do not modify `profiles/<name>/job_scraper/seen_jobs.json`.** Dedup runs off the tracker instead: `/rank` builds its exclusion set from company+role there regardless of status.
 
 Name the tracker row in the "Files Created" report above.
 
