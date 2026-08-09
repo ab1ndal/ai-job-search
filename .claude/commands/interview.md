@@ -33,9 +33,9 @@ v1 preps for a **specific application**. Generic no-target practice is out of sc
 3. **Ask the user what this interview is** (skip anything `outcome.md` already records): stage (phone screen / technical / case / final round), date, format (phone, video, onsite), and who is interviewing (names and titles, if known).
 4. **Read the frameworks once** - do not re-read them in later steps:
    - `.claude/skills/job-application-assistant/07-interview-prep.md`
-   - `.claude/skills/job-application-assistant/01-candidate-profile.md`
-   - `.claude/skills/job-application-assistant/02-behavioral-profile.md`
-   - `.claude/skills/job-application-assistant/04-job-evaluation.md`
+   - `profiles/<name>/skills/01-candidate-profile.md`
+   - `profiles/<name>/skills/02-behavioral-profile.md`
+   - `profiles/<name>/skills/04-job-evaluation.md`
 
 ---
 
