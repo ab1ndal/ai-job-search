@@ -231,5 +231,21 @@ class RealRepoTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
+class ProfileIgnoreRules(unittest.TestCase):
+    """Personal data moved under profiles/, which no root-relative rule matches."""
+
+    def test_guard_requires_profiles_dir_ignored(self):
+        self.assertIn("profiles/", security_guards.REQUIRED_IGNORE_RULES)
+
+    def test_guard_requires_active_profile_pointer_ignored(self):
+        self.assertIn(".active-profile", security_guards.REQUIRED_IGNORE_RULES)
+
+    def test_repo_gitignore_satisfies_both(self):
+        text = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+        rules = {line.strip() for line in text}
+        self.assertIn("profiles/", rules)
+        self.assertIn(".active-profile", rules)
+
+
 if __name__ == "__main__":
     unittest.main()
