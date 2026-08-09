@@ -71,3 +71,12 @@ a hard no, not a gap to smooth over. -->
 - [NAME], [TITLE], [COMPANY] ([EMAIL], [PHONE])
 
 More references available upon request.
+
+## Known Gaps
+<!-- Populated by /rank and /apply when a profile thin-spot is asked about.
+Entries here are never re-surfaced as questions. Removed automatically by
+/expand or /setup when the same skill is later added to Technical Skills.
+See .claude/skills/job-application-assistant/10-thin-spot-detection.md -->
+
+| Gap | Asked | Status |
+|-----|-------|--------|

@@ -221,6 +221,12 @@ Wait for the user's choice on each conflict. If no conflicts, state "No conflict
 
 Apply the confirmed changes with the Edit tool. Make targeted edits only. Do not rewrite entire files. State which changes were applied per file. If a file has no confirmed changes, state "No changes made to [filename]."
 
+If any Technical Skills entries are being written in this step, and the
+profile's `01-candidate-profile.md` already has a `## Known Gaps` table
+(see `.claude/skills/job-application-assistant/10-thin-spot-detection.md`'s
+Pruning Rule), delete any row whose `Gap` matches a skill being added
+(case-insensitive), in the same write.
+
 Documents cover skills, experience, education, references, and behavioral signal. They do not cover everything `/apply` and `/scrape` need. After the writes, ask follow-up questions for gaps:
 
 - Career goals and target role types
@@ -343,6 +349,12 @@ Replace the placeholder identity block with the user's actual information: name,
 
 ### 2. Populate `profiles/<name>/skills/01-candidate-profile.md` *(Path B and C; skip if Path A populated it)*
 Write the full candidate profile with structured sections: Identity (including Languages, with levels), Education, Professional Experience, Independent Projects, Technical Skills, Publications, Awards, References.
+
+If a `## Known Gaps` table already exists in this profile (unusual on a
+fresh setup, but possible after `/reset` partially preserved data), apply
+the Pruning Rule in
+`.claude/skills/job-application-assistant/10-thin-spot-detection.md`:
+delete any row whose `Gap` matches a skill being written here.
 
 ### 3. Populate `profiles/<name>/skills/02-behavioral-profile.md` *(Path B and C; skip if Path A populated it)*
 Write the behavioral profile based on assessment results or synthesized answers.

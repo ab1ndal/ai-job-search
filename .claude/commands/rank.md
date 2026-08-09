@@ -37,6 +37,28 @@ State how many jobs will be ranked before proceeding.
 
 ---
 
+## Step 1.5: Thin-Spot Q&A
+
+Read `.claude/skills/job-application-assistant/10-thin-spot-detection.md` once (not per job).
+
+No posting text is fetched yet at this point in the workflow, so this step
+scans only for **placeholder gaps** in `04-job-evaluation.md` (Detection
+Rules §1) — silent-skill detection needs posting text and only runs in
+`/apply` (see that doc's Detection Rules §2). Apply the Known Gaps exclusion
+(case-insensitive), then cap remaining placeholder gaps at 5 by dimension
+weight from `04-job-evaluation.md`'s Weighting section, per its Q&A
+Construction section's `/rank` flow.
+
+If any thin spots remain, ask them all in a single `AskUserQuestion` round,
+then apply the Profile Write Rules to update
+`profiles/<name>/skills/01-candidate-profile.md` and/or
+`profiles/<name>/skills/04-job-evaluation.md` accordingly before continuing.
+
+If no thin spots remain after the Known Gaps exclusion, say nothing and
+continue straight to Step 2.
+
+---
+
 ## Step 2: Batch-Fetch and Score
 
 Dispatch parallel `general-purpose` agents via the **Agent tool**, ~5 jobs per agent (a single agent is fine for ≤5 jobs). Token-efficiency rules, consistent with `/apply`:
