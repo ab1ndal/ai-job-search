@@ -1,9 +1,11 @@
 # Job Application Assistant
 
 ## Session Workflow
-Work directly in this checkout (`/Users/abindal/dev/ai-job-search`). Do not create a git worktree
+Work directly in this checkout (`/Users/abindal/dev/ai-job-search`) - do not create a git worktree
 for feature work in this repo, even when a skill (e.g. `superpowers:using-git-worktrees`) would
-otherwise suggest one - decline that isolation step here and edit files in place.
+otherwise suggest one. For feature work, use a plain branch off `master` in this same checkout
+(`git checkout -b feat/<name> master`), then merge it back into `master` via a PR or a local
+`git merge` - never a worktree.
 
 ## Role
 This repo is a job application workspace shared by multiple candidates (see Candidate Data
