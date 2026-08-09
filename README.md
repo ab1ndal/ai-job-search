@@ -156,7 +156,7 @@ Postings are treated as untrusted input (the workflow follows no instructions em
 
 ```
 ai-job-search/
-├── CLAUDE.md                          # Main candidate profile + workflow rules
+├── CLAUDE.md                          # Repo instructions + verification checklist (no candidate data)
 ├── .claude/
 │   ├── commands/
 │   │   ├── apply.md                   # /apply workflow (drafter-reviewer)
@@ -247,17 +247,19 @@ All claims in the CV and cover letter are verified against your actual profile. 
 
 ### Which files to edit manually
 
-If you prefer editing files directly instead of using `/setup`:
+If you prefer editing files directly instead of using `/profile new` + `/setup`, edit your candidate's
+files under `profiles/<name>/` (resolution rules: `.claude/PROFILES.md`). `CLAUDE.md` holds only
+repo-wide instructions and the verification checklist — it carries no candidate data.
 
 | File | What to change |
 |------|---------------|
-| `CLAUDE.md` | Your full profile (name, education, experience, skills, goals) |
-| `01-candidate-profile.md` | Structured version of your CV data |
-| `02-behavioral-profile.md` | Your behavioral assessment or self-assessment |
-| `04-job-evaluation.md` | Skill match areas, career goals, motivation filters |
-| `05-cv-templates.md` | Profile statement templates for different role types |
-| `07-interview-prep.md` | Your STAR examples from actual experience |
-| `search-queries.md` | Job search queries for your skills and location |
+| `profiles/<name>/PROFILE.md` | Your identity block (name, location, languages, CV language, status) |
+| `profiles/<name>/skills/01-candidate-profile.md` | Structured version of your CV data |
+| `profiles/<name>/skills/02-behavioral-profile.md` | Your behavioral assessment or self-assessment |
+| `profiles/<name>/skills/04-job-evaluation.md` | Skill match areas, career goals, motivation filters |
+| `.claude/skills/job-application-assistant/05-cv-templates.md` | Profile statement templates for different role types (shared across profiles) |
+| `.claude/skills/job-application-assistant/07-interview-prep.md` | Your STAR examples from actual experience (shared across profiles) |
+| `profiles/<name>/skills/search-queries.md` | Job search queries for your skills and location |
 
 ### Updating your search queries
 

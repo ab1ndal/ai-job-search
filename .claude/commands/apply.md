@@ -86,7 +86,7 @@ Also read the most recent existing CV and cover letter files for concrete struct
 - **Address stated logistics and prerequisites** in the cover letter where the posting raises them: security clearance willingness, start date or availability, commute or location fit, and the posting's reference/job ID where one exists. When the employer operates across several countries, a truthful language-capabilities sentence mapped to their footprint is high-value targeting.
 
 ### CV (`profiles/<name>/cv/main_<company>_<role><CV_EXT>`)
-- In the **CV language from the profile** (the CV language in `profiles/<name>/skills/01-candidate-profile.md`). When the profile does not set one, default to **English**. Never switch language per posting - the CV language is a profile-level choice, so all CVs stay consistent and reusable
+- In the **CV language from the profile** (the `CV language:` line in `profiles/<name>/PROFILE.md`'s Identity section). When the profile does not set one, default to **English**. Never switch language per posting - the CV language is a profile-level choice, so all CVs stay consistent and reusable
 - Follow the moderncv/banking format from `05-cv-templates.md`
 - Tailor the profile statement and experience bullets to the specific role
 - Reframe skills and achievements to match job requirements
