@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { runClose } from "./commands/close.js"
+import { runFill } from "./commands/fill.js"
 import { runSnapshot } from "./commands/snapshot.js"
 import { writeError } from "./helpers.js"
 
@@ -26,6 +27,14 @@ async function main(): Promise<number> {
 
   if (cmd === "snapshot") {
     return runSnapshot({ url: argv[1] })
+  }
+
+  if (cmd === "fill") {
+    if (!argv[1]) {
+      writeError("fill requires a <field-map.json> path", "NO_FIELD_MAP")
+      return 1
+    }
+    return runFill({ mapPath: argv[1] })
   }
 
   if (cmd === "close") {
