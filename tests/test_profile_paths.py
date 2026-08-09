@@ -76,10 +76,20 @@ CONVERTED_FILES: list[str] = [
     ".claude/commands/setup.md",
     ".claude/commands/add-template.md",
     ".claude/commands/add-portal.md",
+    ".claude/commands/profile.md",
     ".claude/skills/job-application-assistant/SKILL.md",
     ".claude/skills/job-application-assistant/05-cv-templates.md",
     ".claude/skills/job-application-assistant/06-cover-letter-templates.md",
     ".claude/skills/job-application-assistant/08-application-forms.md",
+]
+
+# User-facing docs that describe candidate paths in prose (Task 11 scope
+# addition). Not specs consumed at runtime, but stale root-relative paths
+# here mislead a human reader the same way a stale spec misleads an agent.
+DOC_FILES: list[str] = [
+    "README.md",
+    "SETUP.md",
+    "AGENTS.md",
 ]
 
 
@@ -107,6 +117,51 @@ class ConvertedFilesUseProfilePaths(unittest.TestCase):
 
     def test_converted_files_exist(self):
         for rel_path in CONVERTED_FILES:
+            self.assertTrue((REPO / rel_path).is_file(), f"missing {rel_path}")
+
+    def test_every_profile_scoped_spec_is_converted(self):
+        expected = {
+            ".claude/commands/add-portal.md",
+            ".claude/commands/add-template.md",
+            ".claude/commands/apply.md",
+            ".claude/commands/expand.md",
+            ".claude/commands/gmail-sync.md",
+            ".claude/commands/html-report.md",
+            ".claude/commands/interview.md",
+            ".claude/commands/notion-sync.md",
+            ".claude/commands/outcome.md",
+            ".claude/commands/profile.md",
+            ".claude/commands/rank.md",
+            ".claude/commands/reset.md",
+            ".claude/commands/setup.md",
+            ".claude/skills/job-application-assistant/05-cv-templates.md",
+            ".claude/skills/job-application-assistant/06-cover-letter-templates.md",
+            ".claude/skills/job-application-assistant/08-application-forms.md",
+            ".claude/skills/job-application-assistant/SKILL.md",
+            ".claude/skills/job-scraper/SKILL.md",
+            ".claude/skills/upskill/SKILL.md",
+        }
+        self.assertEqual(set(CONVERTED_FILES), expected)
+
+    def test_unregistered_specs_have_no_candidate_paths(self):
+        """Catches a new or missed spec that quietly uses a root path."""
+        registered = set(CONVERTED_FILES)
+        hits = []
+        for path in sorted((REPO / ".claude").rglob("*.md")):
+            rel = str(path.relative_to(REPO))
+            if rel in registered:
+                continue
+            hits.extend(offending_lines(rel))
+        self.assertEqual(hits, [], "unregistered spec uses root candidate paths:\n" + "\n".join(hits))
+
+    def test_docs_use_profile_paths(self):
+        hits = []
+        for rel_path in DOC_FILES:
+            hits.extend(offending_lines(rel_path))
+        self.assertEqual(hits, [], "root-relative candidate paths survive in docs:\n" + "\n".join(hits))
+
+    def test_doc_files_exist(self):
+        for rel_path in DOC_FILES:
             self.assertTrue((REPO / rel_path).is_file(), f"missing {rel_path}")
 
 

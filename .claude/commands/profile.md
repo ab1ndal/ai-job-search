@@ -57,20 +57,13 @@ Any other input: say what the valid forms are and stop.
 2. Create `profiles/` first if it does not exist yet (fresh clone), then create this skeleton:
 
    ```
-   profiles/<name>/
-     PROFILE.md
-     skills/
-       01-candidate-profile.md
-       02-behavioral-profile.md
-       03-writing-style.md
-       04-job-evaluation.md
-       search-queries.md
-     tracker.csv
-     cv/
-     cover_letters/
-     documents/
-       applications/ postings/ cv/ linkedin/ diplomas/ references/ interview/
-     job_scraper/
+   profiles/<name>/PROFILE.md
+   profiles/<name>/skills/{01-candidate-profile,02-behavioral-profile,03-writing-style,04-job-evaluation,search-queries}.md
+   profiles/<name>/tracker.csv
+   profiles/<name>/cv/
+   profiles/<name>/cover_letters/
+   profiles/<name>/documents/{applications,postings,cv,linkedin,diplomas,references,interview}/
+   profiles/<name>/job_scraper/
    ```
 
 3. Copy the five `skills/` files verbatim from their repo-root placeholder masters:
