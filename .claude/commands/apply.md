@@ -215,9 +215,15 @@ After all edits are applied, the two files on disk are the final drafts.
 Use `<CV_COMPILE>` and `<COVER_COMPILE>` resolved in Step 2 (the active template's declared compile command, or the stock defaults below if no custom template is active):
 
 ```bash
-cd cv && lualatex -interaction=nonstopmode main_<company>_<role>.tex
-cd ../cover_letters && xelatex -interaction=nonstopmode cover_<company>_<role>.tex
+lualatex -interaction=nonstopmode -output-directory=profiles/<name>/cv \
+    profiles/<name>/cv/main_<company>_<role>.tex
+
+TEXINPUTS=./cover_letters: OSFONTDIR=./cover_letters/ xelatex -interaction=nonstopmode \
+    -output-directory=profiles/<name>/cover_letters \
+    profiles/<name>/cover_letters/cover_<company>_<role>.tex
 ```
+
+Run both from the repo root — `cover.cls` and `OpenFonts/` are shared assets that stay at `cover_letters/` while the generated documents live under `profiles/<name>/`.
 
 - **Stock CV** uses **lualatex** — pdflatex fails on modern MiKTeX with fontawesome5 font-expansion errors. lualatex handles the same sources cleanly.
 - **Stock cover letter** uses **xelatex** — cover.cls requires fontspec.
@@ -261,7 +267,7 @@ An ATS parser reads the PDF's embedded **text layer**, not the rendered page —
 **1. Extract the text layer:**
 
 ```bash
-cd cv && pdftotext -layout main_<company>_<role>.pdf main_<company>_<role>.txt
+pdftotext -layout profiles/<name>/cv/main_<company>_<role>.pdf profiles/<name>/cv/main_<company>_<role>.txt
 ```
 
 Read the `.txt` file.

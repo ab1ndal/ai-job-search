@@ -10,21 +10,23 @@ Cover letters use a custom LaTeX document class (`cover.cls`) with Lato/Raleway 
 
 **Output file:** `profiles/<name>/cover_letters/cover_<company>_<role>.tex`
 **Compile with:** XeLaTeX (cover.cls requires fontspec)
-**Font directory:** `cover_letters/OpenFonts/fonts/`
+**Font directory:** `cover_letters/OpenFonts/fonts/` (shared, at repo root — generated letters keep the upstream `\fontspec[Path = OpenFonts/fonts/...]` strings unchanged; `OSFONTDIR` below is what lets that resolve from a profile subdirectory)
 
 ### Compile command
 
 ```bash
-cd cover_letters && xelatex -interaction=nonstopmode cover_<company>_<role>.tex
+TEXINPUTS=./cover_letters: OSFONTDIR=./cover_letters/ xelatex -interaction=nonstopmode \
+    -output-directory=profiles/<name>/cover_letters \
+    profiles/<name>/cover_letters/cover_<company>_<role>.tex
 ```
 
-Expected output: `Output written on cover_<company>_<role>.pdf (1 page, ...)`. Any page count other than 1 is a failure that must be fixed before presenting to the user.
+Run from the repo root. `TEXINPUTS` lets XeLaTeX find `cover.cls`; `OSFONTDIR` lets fontspec's font search fall back to the shared `cover_letters/OpenFonts/` tree when the class's own `Path = OpenFonts/fonts/...` strings don't resolve relative to the repo-root working directory. Expected output: `Output written on cover_<company>_<role>.pdf (1 page, ...)`. Any page count other than 1 is a failure that must be fixed before presenting to the user.
 
 ## Compile-and-Inspect Loop (MANDATORY)
 
 After writing the cover letter and before presenting to the user, always compile and visually inspect the PDF. Iterate until the layout is clean:
 
-1. Run `xelatex -interaction=nonstopmode cover_<company>_<role>.tex`
+1. Run the compile command above from the repo root
 2. Confirm page count is exactly 1 and compile succeeded
 3. Read the PDF via the Read tool and visually check: signature fits at the bottom, no text cut off, bullet font matches body
 
