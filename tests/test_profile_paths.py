@@ -22,6 +22,8 @@ FORBIDDEN = [
     re.compile(r"(?<!/)cv/main_(?!example)"),
     re.compile(r"(?<!/)cover_letters/[cC]over_(?!example)"),
     re.compile(r"(?<!/)upskill/report"),
+    re.compile(r"(?<!/)gmail_sync/"),
+    re.compile(r"(?<!/)reports/"),
 ]
 
 # Shared assets that legitimately keep their root paths everywhere.
@@ -39,6 +41,11 @@ CONVERTED_FILES: list[str] = [
     ".claude/skills/job-scraper/SKILL.md",
     ".claude/skills/upskill/SKILL.md",
     ".claude/commands/apply.md",
+    ".claude/commands/outcome.md",
+    ".claude/commands/interview.md",
+    ".claude/commands/gmail-sync.md",
+    ".claude/commands/html-report.md",
+    ".claude/commands/notion-sync.md",
 ]
 
 

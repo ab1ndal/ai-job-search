@@ -2,9 +2,9 @@
 
 The command is a markdown spec (the spec IS the implementation), so these
 tests pin the invariants that would break silently: the header format that
-lint_skills.py enforces, the gitignore entry that keeps the personal sync
-state out of version control, and the privacy rule that forbids syncing
-document content to Notion.
+lint_skills.py enforces, the per-profile path that keeps one candidate's
+sync state from suppressing the other's, and the privacy rule that forbids
+syncing document content to Notion.
 """
 import subprocess
 import sys
@@ -19,7 +19,6 @@ except ImportError:
 
 REPO = Path(__file__).resolve().parent.parent
 COMMAND = REPO / ".claude" / "commands" / "notion-sync.md"
-GITIGNORE = REPO / ".gitignore"
 
 
 class NotionSyncCommandSpec(unittest.TestCase):
@@ -36,11 +35,12 @@ class NotionSyncCommandSpec(unittest.TestCase):
         for section in ("## Step 0", "## Step 4", "## Important Rules"):
             self.assertIn(section, text, f"spec lost its {section!r} section")
 
-    def test_personal_sync_state_is_gitignored(self):
+    def test_personal_sync_state_is_profile_scoped(self):
         self.assertIn(
-            "job_scraper/notion_sync.json",
-            GITIGNORE.read_text(encoding="utf-8"),
-            "notion_sync.json is personal state and must never be committable",
+            "profiles/<name>/job_scraper/notion_sync.json",
+            COMMAND.read_text(encoding="utf-8"),
+            "notion_sync.json is per-profile state and the spec must resolve its path "
+            "under profiles/<name>/, not the root job_scraper/",
         )
 
     def test_privacy_rule_documents_never_sync(self):
