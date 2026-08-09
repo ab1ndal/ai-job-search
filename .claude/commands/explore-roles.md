@@ -2,7 +2,7 @@
 
 `/scrape` only finds jobs matching the fixed query categories already written in `search-queries.md`. `/explore-roles` looks outward from the candidate's actual skills and experience to surface role titles and industries the candidate never thought to search for - market-grounded suggestions, not a guess from the profile text alone.
 
-`/explore-roles` produces **lightweight suggestions**, not scored evaluations. It does not touch `search-queries.md`, `tracker.csv`, or `job_scraper/seen_jobs.json` - the candidate decides what enters the active search pipeline.
+`/explore-roles` produces **lightweight suggestions**, not scored evaluations. It does not touch `search-queries.md`, `tracker.csv`, or `profiles/<name>/job_scraper/seen_jobs.json` - the candidate decides what enters the active search pipeline.
 
 Follow these steps **in order**.
 
@@ -113,5 +113,5 @@ After saving, print the list of suggestions with their one-line "Why it fits" ra
 1. **Never fabricate a suggestion.** Every title or industry must be backed by at least one real example found via actual WebSearch results in Step 2. Do not invent job titles, companies, or postings.
 2. **Search with the current year.** Include the year in WebSearch queries so results reflect the current market.
 3. **Use real profile values in query blocks.** Job board, city, and country in every paste-ready block come from the candidate's own `search-queries.md`, never placeholder text like `[YOUR_CITY]`.
-4. **Read-only against every existing profile artifact.** Never write to `search-queries.md`, `tracker.csv`, or `job_scraper/seen_jobs.json`. The only new file this command writes is its own report.
+4. **Read-only against every existing profile artifact.** Never write to `search-queries.md`, `tracker.csv`, or `profiles/<name>/job_scraper/seen_jobs.json`. The only new file this command writes is its own report.
 5. **Always save the report.** Do not skip the Write step even if the user seems satisfied with the terminal output.
