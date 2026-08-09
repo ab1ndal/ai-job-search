@@ -94,13 +94,34 @@ bun run .agents/skills/form-filler/cli/src/cli.ts click "<selector>"
 ```
 Then run `snapshot` again (no URL argument) to read the new page, and return to Step 2.
 
-**Step 4c — Default to the Submit Gate.** In every other case — a button matching Submit/Apply/Send Application, a step indicator showing the last step, **or no not-final signal found in 4a regardless of what the button is labeled (including "Continue" or "Next")** — treat this as the Submit Gate. Do not click anything as part of this step. Continue to Step 5.
+**Step 4c — Default to the Submit Gate.** In every other case — a button matching Submit/Apply/Send Application, a step indicator showing the last step, **or no not-final signal found in 4a regardless of what the button is labeled (including "Continue" or "Next")** — treat this as the Submit Gate. Do not click anything as part of this step.
+
+Before continuing to Step 5, classify which gate case applies, based only on the gated button's own text (never on why 4a/4c triggered):
+- **Case 1 — Confirmed-submit label:** the button's text matches Submit/Apply/Send Application, or a step indicator explicitly shows this is the last step.
+- **Case 2 — Ambiguous label:** the button's text is anything else (e.g. "Continue", "Next", "Proceed") and no step indicator confirms finality.
+
+Carry this classification and the exact button text into Step 5.
 
 ---
 
 ## Step 5: Submit Gate
 
-Show the candidate a summary of every value that was filled across every page of this session (re-read the field maps written in Step 3, or reconstruct from conversation history). Ask explicitly:
+Branch on the case classification carried from Step 4c.
+
+**Case 1 — Confirmed-submit label:** proceed directly with the submit confirmation below.
+
+**Case 2 — Ambiguous label:** first ask the candidate a question that does not presuppose submission:
+
+> "I can't tell whether the button labeled '<button text>' is the final submit action or just advances to another page. Is this actually the final submit for this application?"
+
+- **If the candidate says it is NOT the final submit** (just an ordinary next-page button): click it as a plain page-advance, do not run `close`, do not touch the tracker, and continue the per-page loop:
+  ```bash
+  bun run .agents/skills/form-filler/cli/src/cli.ts click "<selector>"
+  ```
+  Then run `snapshot` again (no URL argument) to read the new page, and return to Step 2. Skip the rest of this step and Step 6 entirely.
+- **If the candidate confirms it IS the final submit:** proceed with the submit confirmation below, using the candidate's answer here as the basis for the summary (do not ask a second, redundant confirmation of finality — the submit-value confirmation below still applies).
+
+**Submit confirmation (Case 1, or Case 2 confirmed-final):** show the candidate a summary of every value that was filled across every page of this session (re-read the field maps written in Step 3, or reconstruct from conversation history). Ask explicitly:
 
 > "This will submit the application to <company> for <role>. Everything above is what will be sent. Submit now?"
 
