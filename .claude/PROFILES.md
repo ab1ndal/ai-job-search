@@ -22,6 +22,7 @@ All paths are relative to the repo root, with `<name>` replaced by the resolved 
 | What | Path |
 |---|---|
 | Application tracker CSV | `profiles/<name>/tracker.csv` |
+| Networking contacts CSV | `profiles/<name>/contacts.csv` (written by `/outreach`) |
 | Personalized skill files | `profiles/<name>/skills/` |
 | Generated CVs | `profiles/<name>/cv/` |
 | Generated cover letters | `profiles/<name>/cover_letters/` |
@@ -29,6 +30,7 @@ All paths are relative to the repo root, with `<name>` replaced by the resolved 
 | Saved postings | `profiles/<name>/documents/postings/` |
 | Source CV, LinkedIn export, diplomas, references | `profiles/<name>/documents/{cv,linkedin,diplomas,references}/` |
 | Interview material | `profiles/<name>/documents/interview/` |
+| Outreach draft archive | `profiles/<name>/documents/contacts/` (written by `/outreach`) |
 | Scraper state | `profiles/<name>/job_scraper/` (`seen_jobs.json`, `notion_sync.json`, scrape reports) |
 | Identity block | `profiles/<name>/PROFILE.md` |
 | Upskill learning reports | `profiles/<name>/upskill/` |
