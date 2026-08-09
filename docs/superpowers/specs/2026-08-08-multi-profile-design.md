@@ -187,6 +187,31 @@ profile behind.
 - Committing any personal data.
 - Migrating existing data: there is none — `/setup` has not been run and no tracker exists.
 
+## Revision 3 — personalized content in "shared" files (found by final review)
+
+Rev 2 classified `cv/main_example.tex`, `05-cv-templates.md`, and `07-interview-prep.md` as shared.
+That was wrong: `/setup` writes candidate data into all three (Steps 5, 6, and 7), and `/apply` and
+`/interview` read them back. Left as is, whichever candidate ran `/setup` last owns the master CV,
+the profile statements, and the STAR examples — and `/apply`'s Grounding Audit would accept the
+other candidate's employers and dates as *grounded*, which is worse than a plain wrong read.
+
+The fix is extraction, not duplication. `05` and `07` are mostly generic guidance, and `05` holds the
+compile commands validated by real compile; copying them per profile would fork that single source of
+truth. So:
+
+- `cv/main_example.tex` stays at the root as an untouched placeholder master (CI compiles it).
+  `/setup` writes the candidate's master CV to `profiles/<name>/cv/main.tex`, and `/apply` grounds
+  against that file.
+- The personalized section of `05` (Profile Statement / Elevator Pitch templates) moves to
+  `profiles/<name>/skills/profile-statements.md`. `05` keeps its generic tailoring and compile
+  guidance and stays shared.
+- The personalized section of `07` (Ready-Made STAR Examples) moves to
+  `profiles/<name>/skills/star-examples.md`. `07` keeps its generic interview guidance and stays
+  shared.
+- Per-profile skill files therefore number seven, not five.
+- `/reset`'s claim that it never touches another profile's data becomes true only after this change;
+  before it, `/reset` cleared sections of the shared `05` and `07`.
+
 ## Verification
 
 1. **Path audit.** Grep the 18 edited files for surviving root-relative profile-scoped references
