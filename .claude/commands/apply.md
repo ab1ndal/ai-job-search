@@ -40,6 +40,16 @@ Read the evaluation framework:
 - `profiles/<name>/skills/04-job-evaluation.md`
 - `profiles/<name>/skills/01-candidate-profile.md`
 
+Read `.claude/skills/job-application-assistant/10-thin-spot-detection.md`.
+Using its Detection Rules, scan this posting's text for thin spots against
+the profile files just read. Apply the Known Gaps exclusion (no batch cap
+needed — this is a single posting).
+
+If any thin spots remain, ask them all in a single `AskUserQuestion` round,
+then apply the Profile Write Rules to update `01-candidate-profile.md`
+and/or `04-job-evaluation.md` before evaluating. If none remain, continue
+straight to the evaluation below.
+
 Using the framework from `04-job-evaluation.md`, evaluate the job posting against the candidate's profile. If the salary lookup tool is configured, run:
 
 ```bash
