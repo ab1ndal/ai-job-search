@@ -271,16 +271,30 @@ Claude will:
 After `/apply` creates the LaTeX files:
 
 ```bash
-# Bash / zsh / Git Bash
-cd cv && lualatex main_<company>_<role>.tex && cd ..
-cd cover_letters && xelatex cover_<company>_<role>.tex && cd ..
+# Bash / zsh / Git Bash — run from the repo root
+lualatex -interaction=nonstopmode -output-directory=profiles/<name>/cv \
+    profiles/<name>/cv/main_<company>_<role>.tex
+
+TEXINPUTS=./cover_letters: OSFONTDIR=./cover_letters/ xelatex -interaction=nonstopmode \
+    -output-directory=profiles/<name>/cover_letters \
+    profiles/<name>/cover_letters/cover_<company>_<role>.tex
 ```
 
 ```powershell
-# PowerShell
-Set-Location cv; lualatex main_<company>_<role>.tex; Set-Location ..
-Set-Location cover_letters; xelatex cover_<company>_<role>.tex; Set-Location ..
+# PowerShell — run from the repo root
+lualatex -interaction=nonstopmode -output-directory=profiles/<name>/cv `
+    profiles/<name>/cv/main_<company>_<role>.tex
+
+$env:TEXINPUTS = ".\cover_letters;"; $env:OSFONTDIR = ".\cover_letters\"
+xelatex -interaction=nonstopmode -output-directory=profiles/<name>/cover_letters `
+    profiles/<name>/cover_letters/cover_<company>_<role>.tex
 ```
+
+`cover.cls` and its bundled fonts stay shared at `cover_letters/` while the generated documents
+live under `profiles/<name>/`, so both commands run from the repo root rather than `cd`-ing into
+either directory. `TEXINPUTS` lets `xelatex` find `cover.cls`; `OSFONTDIR` adds `cover_letters/` as
+a font search root so `cover.cls`'s relative `Path = OpenFonts/fonts/...` strings resolve under it
+— those strings are load-bearing and must not be edited.
 
 These commands apply to the stock templates (moderncv CV, `cover.cls` cover letter). If you'd rather use your own LaTeX template, run `/add-template` — it captures the template's compile engine, fonts, style rules, and page limit, test-compiles it, and wires it into `/apply`. See the "LaTeX templates" section in the README.
 

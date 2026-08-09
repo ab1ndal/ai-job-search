@@ -21,7 +21,7 @@ lualatex -interaction=nonstopmode -output-directory=profiles/<name>/cv \
     profiles/<name>/cv/main_<company>_<role>.tex
 ```
 
-Run from the repo root. Expected output: `Output written on main_<company>_<role>.pdf (2 pages, ...)`. Any page count other than 2 is a failure that must be fixed before presenting to the user.
+Run from the repo root. Pass criterion: the command exits `0` and the log has no `fontspec Error`. A `Output written on ...` line alone is not sufficient — a broken font path can still emit that line while producing garbage output. Once exit status and log are clean, check the page count as an additional signal: `main_<company>_<role>.pdf (2 pages, ...)`. Any page count other than 2 is a failure that must be fixed before presenting to the user.
 
 ## Document Structure
 
