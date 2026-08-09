@@ -83,7 +83,9 @@ export async function extractSnapshot(page: Page, screenshotPath: string): Promi
     .catch(() => false)
 
   const hasPassword = fields.some((f) => f.type === "password")
-  const onlyIdentityFields = fields.every((f) => f.tag === "input" && (f.type === "text" || f.type === "password"))
+  const onlyIdentityFields = fields.every(
+    (f) => f.tag === "input" && (f.type === "text" || f.type === "password" || f.type === "email" || f.type === "tel"),
+  )
 
   let pageState: SnapshotResult["pageState"]
   if (hasCaptcha) pageState = "captcha"

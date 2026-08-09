@@ -36,6 +36,12 @@ describe("extractSnapshot", () => {
     expect(result.pageState).toBe("login_wall")
   })
 
+  test("detects a login wall with an email-type username field", async () => {
+    await page.goto(`file://${join(FIXTURES, "login-email.html")}`)
+    const result = await extractSnapshot(page, join(tmpdir(), "login-email-snap.png"))
+    expect(result.pageState).toBe("login_wall")
+  })
+
   test("detects a captcha", async () => {
     await page.goto(`file://${join(FIXTURES, "captcha.html")}`)
     const result = await extractSnapshot(page, join(tmpdir(), "captcha-snap.png"))
