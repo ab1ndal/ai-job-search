@@ -33,7 +33,11 @@ ALLOWED_SUBSTRINGS = [
 ]
 
 # Appended to by each conversion task.
-CONVERTED_FILES: list[str] = []
+CONVERTED_FILES: list[str] = [
+    ".claude/commands/rank.md",
+    ".claude/skills/job-scraper/SKILL.md",
+    ".claude/skills/upskill/SKILL.md",
+]
 
 
 def offending_lines(rel_path: str) -> list[str]:
