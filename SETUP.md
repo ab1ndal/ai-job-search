@@ -151,16 +151,7 @@ Push-Location $SmokeDir; xelatex -interaction=nonstopmode -halt-on-error cover_s
 
 If `pdftotext` is missing, `/apply` skips the mechanical check with a warning and falls back to a visual keyword review — everything else works normally.
 
-## 2. Fork and clone
-
-```bash
-gh repo fork MadsLorentzen/ai-job-search --clone
-cd ai-job-search
-```
-
-Or manually: fork on GitHub, then clone your fork.
-
-## 3. Install job search CLI dependencies
+## 2. Install job search CLI dependencies
 Run these from the repository root.
 
 - PowerShell:
@@ -185,7 +176,28 @@ For `linkedin-search` and `freehire-search` the install is optional: both have z
 
 If you're outside Denmark, you can generate an equivalent search skill for your local job board with `/add-portal` — it scaffolds the same CLI structure for any public portal and test-runs a live query before registering. See the "Job search tools" section in the README.
 
-## 4. Run the setup interview
+## 3. Run the setup interview
+
+### Bootstrap a profile (first run, or adding a second candidate)
+
+This repo serves candidates from separate `profiles/<name>/` directories, one active at a time via
+`.active-profile`. On a fresh clone `profiles/` doesn't exist yet, so create and activate a profile
+before running `/setup`:
+
+```
+/profile new <name>
+/profile use <name>
+```
+
+- `/profile new <name>` scaffolds `profiles/<name>/` (skills/, cv/, cover_letters/, documents/,
+  tracker.csv, a placeholder PROFILE.md). Rejects the name if the directory already exists or the
+  name isn't lowercase letters/digits/hyphens/underscores. It does not switch to the new profile.
+- `/profile use <name>` writes `<name>` to `.active-profile` at the repo root. Every profile-scoped
+  command - including `/setup` - reads and writes only inside whichever profile is active.
+
+Repeat both commands for each additional candidate sharing this repo. Switch between existing
+profiles later with `/profile use <name>` alone (no re-scaffold). `/profile status` prints a merged
+tracker view across every profile.
 
 Start Claude Code in the repository:
 
@@ -235,7 +247,7 @@ You can update specific sections later:
 
 The `--section search` option is especially useful as your priorities evolve. It re-runs the search configuration interview and suggests role types you may not have considered based on your full profile.
 
-## 5. Optional: Set up salary benchmarking
+## 4. Optional: Set up salary benchmarking
 
 If you have salary data (from a union, salary survey, Glassdoor, or personal research):
 
@@ -248,7 +260,7 @@ If you have salary data (from a union, salary survey, Glassdoor, or personal res
 
 This creates `salary_data.json` which the `/apply` workflow uses for salary benchmarking. If you skip this step, salary lookup is simply omitted.
 
-## 6. Test the workflow
+## 5. Test the workflow
 
 Find a job posting you're interested in, then:
 
@@ -269,7 +281,7 @@ Claude will:
 4. Have a reviewer agent critique the drafts
 5. Revise and present the final output
 
-## 7. Compile your documents
+## 6. Compile your documents
 
 After `/apply` creates the LaTeX files:
 
@@ -301,7 +313,7 @@ a font search root so `cover.cls`'s relative `Path = OpenFonts/fonts/...` string
 
 These commands apply to the stock templates (moderncv CV, `cover.cls` cover letter). If you'd rather use your own LaTeX template, run `/add-template` — it captures the template's compile engine, fonts, style rules, and page limit, test-compiles it, and wires it into `/apply`. See the "LaTeX templates" section in the README.
 
-## 8. Pulling upstream updates into your fork
+## 7. Pulling upstream updates into your fork
 
 Upstream keeps improving the methodology files your fork has personalized, so plan for updates from day one:
 
