@@ -26,7 +26,9 @@ Any other input: say what the valid forms are and stop.
 ## Step 1: `/profile` - show
 
 1. Resolve the active profile per `.claude/PROFILES.md`. If none is set, list the directories under
-   `profiles/` and tell the user to run `/profile use <name>`, then stop.
+   `profiles/` and tell the user to run `/profile use <name>`, then stop. If `profiles/` does not
+   exist at all (fresh clone), say no profiles exist yet and point at `/profile new <name>`, then
+   stop.
 2. Print `Profile: <name>` as the first line.
 3. For **every** directory under `profiles/`, read its `tracker.csv` (skip, with a note, if absent)
    and report: total rows, open count, final count, and the date of the most recent row.
@@ -40,8 +42,9 @@ Any other input: say what the valid forms are and stop.
 
 1. Verify `profiles/<name>/` exists. If not, list the valid names and stop - do not create it, and
    do not fall back to another profile.
-2. Write `<name>`, followed by a newline, as the entire contents of `.active-profile`. Change
-   nothing else.
+2. Write `<name>`, followed by a newline, as the entire contents of `.active-profile`. This is the
+   only file this step writes. Change nothing else - no tracker, no skills file, no other
+   profile's data.
 3. Print `Profile: <name>` and one line naming the tracker now in effect
    (`profiles/<name>/tracker.csv`).
 
@@ -51,7 +54,7 @@ Any other input: say what the valid forms are and stop.
 
 1. Reject a name that is not lowercase letters, digits, hyphens, or underscores. Reject a name whose
    directory already exists.
-2. Create this skeleton:
+2. Create `profiles/` first if it does not exist yet (fresh clone), then create this skeleton:
 
    ```
    profiles/<name>/
@@ -71,7 +74,10 @@ Any other input: say what the valid forms are and stop.
    ```
 
 3. Copy the five `skills/` files verbatim from their repo-root placeholder masters:
-   `.claude/skills/job-application-assistant/0{1,2,3,4}-*.md` and
+   `.claude/skills/job-application-assistant/01-candidate-profile.md`,
+   `.claude/skills/job-application-assistant/02-behavioral-profile.md`,
+   `.claude/skills/job-application-assistant/03-writing-style.md`,
+   `.claude/skills/job-application-assistant/04-job-evaluation.md`, and
    `.claude/skills/job-scraper/search-queries.md`. Copy, never move - the masters stay in place for
    the next profile.
 4. Write `tracker.csv` with the standard header and no rows:

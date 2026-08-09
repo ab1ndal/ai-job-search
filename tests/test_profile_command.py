@@ -24,6 +24,14 @@ SCAFFOLD_ENTRIES = [
     "job_scraper/",
 ]
 
+PERSONALIZED_SKILL_FILES = [
+    "01-candidate-profile.md",
+    "02-behavioral-profile.md",
+    "03-writing-style.md",
+    "04-job-evaluation.md",
+    "search-queries.md",
+]
+
 
 class ProfileCommandSpec(unittest.TestCase):
     def setUp(self):
@@ -55,9 +63,18 @@ class ProfileCommandSpec(unittest.TestCase):
         for entry in SCAFFOLD_ENTRIES:
             self.assertIn(entry, section, f"/profile new must scaffold {entry}")
 
+    def test_new_names_all_five_personalized_skill_files(self):
+        # A brace expansion like "0{1,2,3,4}-*.md" would still pass the scaffold-entry
+        # check above without any single filename being individually findable. A profile
+        # missing one of these five would fall back to placeholder text mid-application.
+        section = self.text.split("/profile new", 1)[1]
+        for filename in PERSONALIZED_SKILL_FILES:
+            self.assertIn(filename, section, f"/profile new must name {filename} explicitly")
+
     def test_use_writes_only_the_pointer_file(self):
         section = self.text.split("/profile use", 1)[1]
         self.assertIn(".active-profile", section)
+        self.assertIn("only file this step writes", section)
 
     def test_status_labels_rows_by_profile(self):
         section = self.text.split("/profile status", 1)[1]
