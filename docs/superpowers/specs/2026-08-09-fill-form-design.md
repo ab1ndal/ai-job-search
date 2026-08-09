@@ -116,8 +116,8 @@ search CLIs.
 |---|---|
 | Name, email, phone, address, education, work history | `profiles/<name>/skills/01-candidate-profile.md` and `profiles/<name>/PROFILE.md` |
 | Self-intro, motivation, project entries, other free-text | The company's existing `.txt` file from `08-application-forms.md`'s output, if one exists for this company/role. If none exists, draft the content live following `08-application-forms.md`'s rules (same grounding requirement: every claim traceable to `01-candidate-profile.md` + master CV + `PROFILE.md`) |
-| Resume/CV upload | `profiles/<name>/cv/main_<company>_<role><CV_EXT>` compiled PDF, matched by the same naming convention `/apply` writes — shown to the candidate for confirmation before upload, never uploaded silently |
-| Cover letter upload | `profiles/<name>/cover_letters/cover_<company>_<role><COVER_EXT>` compiled PDF, same confirmation rule |
+| Resume/CV upload | `profiles/<name>/cv/main_<company>_<role>.pdf` — the compiled PDF, not the `.tex` source, matched by the same naming convention `/apply` writes — shown to the candidate for confirmation before upload, never uploaded silently |
+| Cover letter upload | `profiles/<name>/cover_letters/cover_<company>_<role>.pdf`, likewise the compiled PDF, same confirmation rule |
 | Field Claude cannot confidently map to any source | Flagged to the candidate as unrecognized; never guessed |
 
 ## User-Gated Stop Conditions
