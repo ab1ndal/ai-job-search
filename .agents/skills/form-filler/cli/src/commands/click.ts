@@ -1,6 +1,6 @@
-import { connectSession } from "../session.js"
-import { clickAndWait } from "../click-and-wait.js"
-import { writeError } from "../helpers.js"
+import { connectSession } from "../session.ts"
+import { clickAndWait } from "../click-and-wait.ts"
+import { writeError } from "../helpers.ts"
 
 export interface ClickOpts {
   selector: string

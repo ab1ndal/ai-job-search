@@ -1,7 +1,7 @@
 import { stat } from "fs/promises"
-import { connectSession } from "../session.js"
-import { uploadFile } from "../upload-file.js"
-import { writeError } from "../helpers.js"
+import { connectSession } from "../session.ts"
+import { uploadFile } from "../upload-file.ts"
+import { writeError } from "../helpers.ts"
 
 export interface UploadOpts {
   selector: string

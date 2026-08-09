@@ -1,21 +1,21 @@
-#!/usr/bin/env bun
-import { runClick } from "./commands/click.js"
-import { runClose } from "./commands/close.js"
-import { runFill } from "./commands/fill.js"
-import { runSnapshot } from "./commands/snapshot.js"
-import { runUpload } from "./commands/upload.js"
-import { writeError } from "./helpers.js"
+#!/usr/bin/env node
+import { runClick } from "./commands/click.ts"
+import { runClose } from "./commands/close.ts"
+import { runFill } from "./commands/fill.ts"
+import { runSnapshot } from "./commands/snapshot.ts"
+import { runUpload } from "./commands/upload.ts"
+import { writeError } from "./helpers.ts"
 
 const HELP = `form-filler-cli — drive a browser through an online application form
 
 USAGE
-  bun run src/cli.ts snapshot [url]        Start or read the current page. First call requires a URL.
-  bun run src/cli.ts fill <field-map.json> Fill fields from a {selector: value} JSON file.
-  bun run src/cli.ts upload <selector> <file-path>  Set a file-input field.
-  bun run src/cli.ts click <selector>      Click a button/link and wait for navigation.
-  bun run src/cli.ts close                 Close the browser session.
+  node src/cli.ts snapshot [url]        Start or read the current page. First call requires a URL.
+  node src/cli.ts fill <field-map.json> Fill fields from a {selector: value} JSON file.
+  node src/cli.ts upload <selector> <file-path>  Set a file-input field.
+  node src/cli.ts click <selector>      Click a button/link and wait for navigation.
+  node src/cli.ts close                 Close the browser session.
 
-Requires Playwright's Chromium browser installed: bunx playwright install chromium
+Requires Playwright's Chromium browser installed: npx playwright install chromium
 `
 
 async function main(): Promise<number> {

@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises"
-import { connectSession } from "../session.js"
-import { fillFields } from "../fill-fields.js"
-import { writeError } from "../helpers.js"
+import { connectSession } from "../session.ts"
+import { fillFields } from "../fill-fields.ts"
+import { writeError } from "../helpers.ts"
 
 export interface FillOpts {
   mapPath: string
