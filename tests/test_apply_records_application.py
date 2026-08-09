@@ -110,7 +110,7 @@ class ApplyRecordsApplication(unittest.TestCase):
 
     def test_seen_jobs_is_left_alone(self):
         self.assertIn(
-            "Do not modify `job_scraper/seen_jobs.json`",
+            "Do not modify `profiles/<name>/job_scraper/seen_jobs.json`",
             self.step_6b,
             "drafting is not applying, and that file has no honest value for either",
         )

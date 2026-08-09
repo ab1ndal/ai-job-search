@@ -8,23 +8,25 @@ framework_version: 1.0.1
 
 Cover letters use a custom LaTeX document class (`cover.cls`) with Lato/Raleway fonts.
 
-**Output file:** `cover_letters/cover_<company>_<role>.tex`
+**Output file:** `profiles/<name>/cover_letters/cover_<company>_<role>.tex`
 **Compile with:** XeLaTeX (cover.cls requires fontspec)
-**Font directory:** `cover_letters/OpenFonts/fonts/`
+**Font directory:** `cover_letters/OpenFonts/fonts/` (shared, at repo root — generated letters keep the upstream `\fontspec[Path = OpenFonts/fonts/...]` strings exactly as-is; `OSFONTDIR` below adds `cover_letters/` as a kpathsea search root so that relative `Path` resolves under it when compiling from the repo root. `OSFONTDIR` is not a by-name fallback — the class's literal `Path` subpath must exist under the search root, so never "tidy" these strings to `cover_letters/OpenFonts/...`)
 
 ### Compile command
 
 ```bash
-cd cover_letters && xelatex -interaction=nonstopmode cover_<company>_<role>.tex
+TEXINPUTS=./cover_letters: OSFONTDIR=./cover_letters/ xelatex -interaction=nonstopmode \
+    -output-directory=profiles/<name>/cover_letters \
+    profiles/<name>/cover_letters/cover_<company>_<role>.tex
 ```
 
-Expected output: `Output written on cover_<company>_<role>.pdf (1 page, ...)`. Any page count other than 1 is a failure that must be fixed before presenting to the user.
+Run from the repo root. `TEXINPUTS` lets XeLaTeX find `cover.cls`. `OSFONTDIR` adds `cover_letters/` as a font search root so `cover.cls`'s own relative `Path = OpenFonts/fonts/...` strings resolve under it — those strings are load-bearing (the class embeds the actual font lookup path, not just a font name) and must not be edited to `cover_letters/OpenFonts/...` or anywhere else; doing so breaks the build. Pass criterion: the command exits `0` and the log has no `fontspec Error`. A `Output written on ...` line alone is not sufficient — a missing `OSFONTDIR` still produces that line while emitting 31 `fontspec Error`s and embedding zero fonts. Once exit status and log are clean, check the page count as an additional signal: `cover_<company>_<role>.pdf (1 page, ...)`. Any page count other than 1 is a failure that must be fixed before presenting to the user.
 
 ## Compile-and-Inspect Loop (MANDATORY)
 
 After writing the cover letter and before presenting to the user, always compile and visually inspect the PDF. Iterate until the layout is clean:
 
-1. Run `xelatex -interaction=nonstopmode cover_<company>_<role>.tex`
+1. Run the compile command above from the repo root
 2. Confirm page count is exactly 1 and compile succeeded
 3. Read the PDF via the Read tool and visually check: signature fits at the bottom, no text cut off, bullet font matches body
 

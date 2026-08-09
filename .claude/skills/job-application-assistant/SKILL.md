@@ -12,6 +12,10 @@ framework_version: 1.3.1
 
 ---
 
+**Profile:** resolve the active candidate profile per `.claude/PROFILES.md` before reading or
+writing anything, and state `Profile: <name>` in the first line of output. `<name>` in the paths
+below is that resolved profile.
+
 ## Workflow
 
 When the user provides a job posting (URL or text), follow this workflow:
@@ -20,26 +24,26 @@ When the user provides a job posting (URL or text), follow this workflow:
 - Fetch the job posting content (use WebFetch for URLs). **A 403 is not a dead end** - follow the escalation order in `09-web-research.md` before concluding a page is unavailable, and prefer the employer's own careers posting over an aggregator listing
 - Analyze the posting for required competencies, keywords, and priorities
 - Research the company (website, LinkedIn, mission, recent news), per `09-web-research.md`
-- Score the posting against the candidate's profile using the framework in `04-job-evaluation.md`
+- Score the posting against the candidate's profile using the framework in `profiles/<name>/skills/04-job-evaluation.md`
 - Present the evaluation table and verdict
-- Suggest whether the candidate should call the employer before applying (see `04-job-evaluation.md` for guidance)
+- Suggest whether the candidate should call the employer before applying (see `profiles/<name>/skills/04-job-evaluation.md` for guidance)
 - Ask the user if they want to proceed with an application
 
 ### Step 2: Tailor CV
-- Read the most relevant existing CV variant from `cv/` as a starting point
+- Read the most relevant existing CV variant from `profiles/<name>/cv/` as a starting point
 - Follow the guidelines in `05-cv-templates.md`
-- Create `cv/main_<company>_<role>.tex` with tailored content
+- Create `profiles/<name>/cv/main_<company>_<role>.tex` with tailored content
 - Adjust: profile statement, skills section, experience bullet emphasis, section order
 
 ### Step 3: Write Cover Letter
-- Follow the writing style rules in `03-writing-style.md` (critical: no em-dashes, no cliches)
+- Follow the writing style rules in `profiles/<name>/skills/03-writing-style.md` (critical: no em-dashes, no cliches)
 - Follow the template structure in `06-cover-letter-templates.md`
-- Create `cover_letters/cover_<company>_<role>.tex`
+- Create `profiles/<name>/cover_letters/cover_<company>_<role>.tex`
 - Ensure the letter connects specific experience to the role requirements
 
 ### Step 3b: Record the Application
 - Run this once both documents exist. A CV or cover letter drafted alone is not yet an application.
-- Follow **`/apply` Step 6b** (`.claude/commands/apply.md`) exactly: same header, same match-then-update rule, same `drafted` row, same prohibition on touching `job_scraper/seen_jobs.json`. It is stated there once so the two paths cannot drift. Two of its values are named in `/apply`'s own terms: `cv_file`/`cover_letter_file` are the paths written in Steps 2 and 3 here, and `source` is the posting URL from Step 1.
+- Follow **`/apply` Step 6b** (`.claude/commands/apply.md`) exactly: same header, same match-then-update rule, same `drafted` row, same prohibition on touching `profiles/<name>/job_scraper/seen_jobs.json`. It is stated there once so the two paths cannot drift. Two of its values are named in `/apply`'s own terms: `cv_file`/`cover_letter_file` are the paths written in Steps 2 and 3 here, and `source` is the posting URL from Step 1.
 - This step exists here because `/scrape` Step 5 routes straight into this skill. Without it, that path writes two documents and records nothing.
 
 ### Step 4: Interview Preparation
@@ -54,13 +58,15 @@ When the user provides a job posting (URL or text), follow this workflow:
 
 | File | Purpose |
 |------|---------|
-| `01-candidate-profile.md` | Education, experience, skills, publications, awards |
-| `02-behavioral-profile.md` | Behavioral assessment, strengths, ideal environments |
-| `03-writing-style.md` | Tone, structure, do's and don'ts |
-| `04-job-evaluation.md` | Scoring framework for job fit |
+| `profiles/<name>/skills/01-candidate-profile.md` | Education, experience, skills, publications, awards |
+| `profiles/<name>/skills/02-behavioral-profile.md` | Behavioral assessment, strengths, ideal environments |
+| `profiles/<name>/skills/03-writing-style.md` | Tone, structure, do's and don'ts |
+| `profiles/<name>/skills/04-job-evaluation.md` | Scoring framework for job fit |
+| `profiles/<name>/skills/profile-statements.md` | Candidate's profile statement templates |
+| `profiles/<name>/skills/star-examples.md` | Candidate's STAR examples |
 | `05-cv-templates.md` | LaTeX CV structure and tailoring rules |
 | `06-cover-letter-templates.md` | LaTeX cover letter structure and tailoring rules |
-| `07-interview-prep.md` | STAR examples, tough questions, roleplay guidelines |
+| `07-interview-prep.md` | STAR format, tough questions, roleplay guidelines |
 | `08-application-forms.md` | Portal free-text fields: self-introduction, project entries, character-limited pitches |
 | `09-web-research.md` | Fetching postings and company pages: trust boundary, the WebFetch 403 fallback, escalation order, claim verification |
 

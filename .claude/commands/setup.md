@@ -8,21 +8,29 @@ There are three paths into setup. Step 0 picks the right one; all three converge
 
 ## Step 0: Welcome & Choose Path
 
+**Profile:** resolve the active candidate profile per `.claude/PROFILES.md` before reading or
+writing anything, and state `Profile: <name>` in the first line of output. `<name>` in the paths
+below is that resolved profile. `/setup` writes the seven personalized skill files into
+`profiles/<name>/skills/`, the identity block into `profiles/<name>/PROFILE.md`, and the
+candidate's master CV into `profiles/<name>/cv/main.tex` — it never writes to the repo-root
+masters under `.claude/skills/` or to root `cv/main_example.tex`, and the root `CLAUDE.md` holds no
+candidate data.
+
 If `$ARGUMENTS` contains `--section <name>`, skip directly to that section in Path C for an update-only flow. Do not run the path-selection prompt below.
 
-Otherwise, before greeting the user, scan the `documents/` folder. Use Glob with `documents/**/*` and count files per subfolder (`cv/`, `linkedin/`, `diplomas/`, `references/`, `applications/`).
+Otherwise, before greeting the user, scan the `profiles/<name>/documents/` folder. Use Glob with `profiles/<name>/documents/**/*` and count files per subfolder (`cv/`, `linkedin/`, `diplomas/`, `references/`, `applications/`).
 
 Then welcome the user with a single message that lists three paths. The wording changes based on what was found.
 
-**If `documents/` has files** in one or more subfolders, lead with Path A:
+**If `profiles/<name>/documents/` has files** in one or more subfolders, lead with Path A:
 
 > **Welcome to the AI Job Search setup!**
 >
 > I'll help you build your professional profile so Claude can evaluate job postings, tailor CVs, write cover letters, and prepare you for interviews.
 >
-> I see files in your `documents/` folder: [list per subfolder, e.g. "2 in cv/, 1 in linkedin/, 3 in references/"]. Three ways to start:
+> I see files in your `profiles/<name>/documents/` folder: [list per subfolder, e.g. "2 in cv/, 1 in linkedin/, 3 in references/"]. Three ways to start:
 >
-> **Path A: Read my documents folder** (recommended for what you have) - I'll read everything in `documents/`, cross-reference for consistency, and build your profile from real source materials. Idempotent and safe to re-run as you add more documents.
+> **Path A: Read my documents folder** (recommended for what you have) - I'll read everything in `profiles/<name>/documents/`, cross-reference for consistency, and build your profile from real source materials. Idempotent and safe to re-run as you add more documents.
 >
 > **Path B: Single CV import** - Paste or @-mention a single CV/resume here. I'll extract it and ask follow-up questions for what's missing.
 >
@@ -30,7 +38,7 @@ Then welcome the user with a single message that lists three paths. The wording 
 >
 > Which would you like?
 
-**If `documents/` is empty or missing**, surface Path A as a "do this if you have materials" option:
+**If `profiles/<name>/documents/` is empty or missing**, surface Path A as a "do this if you have materials" option:
 
 > **Welcome to the AI Job Search setup!**
 >
@@ -38,7 +46,7 @@ Then welcome the user with a single message that lists three paths. The wording 
 >
 > Three ways to start:
 >
-> **Path A: Documents folder** (best signal if you have several materials) - Drop your CV / LinkedIn export / diplomas / reference letters in the `documents/` folder, then say "go". I'll read everything and build your profile from it. See `documents/README.md` for the folder layout.
+> **Path A: Documents folder** (best signal if you have several materials) - Drop your CV / LinkedIn export / diplomas / reference letters in the `profiles/<name>/documents/` folder, then say "go". I'll read everything and build your profile from it. See `documents/README.md` for the folder layout.
 >
 > **Path B: Single CV import** - Paste or @-mention a single CV/resume here. I'll extract it and ask follow-up questions for what's missing.
 >
@@ -52,13 +60,13 @@ Wait for the user's choice. If they pick A but the folder is still empty, tell t
 
 ## Path A: Documents Folder
 
-Reads structured documents in `documents/`, cross-references them for consistency, and merges extracted data into the seven profile skill files. Read-before-write and idempotent: changes already present will not be proposed again.
+Reads structured documents in `profiles/<name>/documents/`, cross-references them for consistency, and merges extracted data into the seven profile skill files. Read-before-write and idempotent: changes already present will not be proposed again.
 
 Follow these steps **exactly in order**.
 
 ### Step A1: Inventory
 
-Use Glob with `documents/**/*` to scan the full tree. Print:
+Use Glob with `profiles/<name>/documents/**/*` to scan the full tree. Print:
 
 ```
 ## Documents Found
@@ -78,13 +86,13 @@ If every subfolder is empty, stop and tell the user to populate the folder. Poin
 
 Read these in parallel before extracting anything. You must know what is already there to make the merge intelligent.
 
-- `.claude/skills/job-application-assistant/01-candidate-profile.md`
-- `.claude/skills/job-application-assistant/02-behavioral-profile.md`
-- `.claude/skills/job-application-assistant/03-writing-style.md`
-- `.claude/skills/job-application-assistant/04-job-evaluation.md`
-- `.claude/skills/job-application-assistant/05-cv-templates.md`
+- `profiles/<name>/skills/01-candidate-profile.md`
+- `profiles/<name>/skills/02-behavioral-profile.md`
+- `profiles/<name>/skills/03-writing-style.md`
+- `profiles/<name>/skills/04-job-evaluation.md`
+- `profiles/<name>/skills/profile-statements.md`
+- `profiles/<name>/skills/star-examples.md`
 - `.claude/skills/job-application-assistant/06-cover-letter-templates.md`
-- `.claude/skills/job-application-assistant/07-interview-prep.md`
 
 Hold this content in context throughout Path A. Do not re-read.
 
@@ -94,7 +102,7 @@ Read each document found in Step A1. Process subfolders in this order: `cv/`, `l
 
 **`cv/` documents:** name, contact (email, phone, LinkedIn, GitHub), education (degree, institution, dates, thesis), work experience (title, company, dates, location, bullets), skills, languages (with any stated proficiency), publications, awards, profile/summary.
 
-**`linkedin/` documents:** About/summary section (full text, used for behavioral inference), work experience, education, skills and endorsements, **Languages section** (language name + self-rated proficiency level, e.g. "Spanish - Native or bilingual proficiency" - a high-confidence structured source, feeds the Language Gate in `04-job-evaluation.md`), certifications, volunteer work, publications, recommendations received (full text). If multiple LinkedIn exports are present, use the most recently modified file.
+**`linkedin/` documents:** About/summary section (full text, used for behavioral inference), work experience, education, skills and endorsements, **Languages section** (language name + self-rated proficiency level, e.g. "Spanish - Native or bilingual proficiency" - a high-confidence structured source, feeds the Language Gate in `profiles/<name>/skills/04-job-evaluation.md`), certifications, volunteer work, publications, recommendations received (full text). If multiple LinkedIn exports are present, use the most recently modified file.
 
 **`diplomas/` documents:** official degree title and level, institution name (official spelling), graduation date, grade or distinction or GPA if visible.
 
@@ -138,18 +146,18 @@ If no inconsistencies, state "No cross-reference issues found." and continue.
 
 For each skill file, compare extracted document content against the current file content from Step A2. Build two buckets.
 
-**Additive changes:** entirely new content not in the skill file in any form. Examples: a certification not in `01-candidate-profile.md`, a new endorsement skill, a referee not yet listed, a new behavioral quote from a reference letter, a new award.
+**Additive changes:** entirely new content not in the skill file in any form. Examples: a certification not in `profiles/<name>/skills/01-candidate-profile.md`, a new endorsement skill, a referee not yet listed, a new behavioral quote from a reference letter, a new award.
 
 **Conflicting changes:** content that touches something already in a skill file but disagrees. Examples: a different date range for an existing job, a different job title for the same role, a different graduation date than what is recorded.
 
 **Inference rules** (apply when populating from inferred sources):
 
-- **`02-behavioral-profile.md`:** Source is LinkedIn About + recommendation letters. Extract recurring themes, adjectives, phrases about how the candidate works. Add only to "Strongest Behavioral Traits", "How [Candidate] Works Best", or "Management Style Preferences" sections. Do not overwrite existing scored assessments. Always label inferred additions: *[Inferred from LinkedIn About / Reference letter - review before relying on this]*
-- **`03-writing-style.md`:** Source is `cover_letter.tex` files. Extract recurring patterns. Add as observations under "## Patterns Observed in Past Applications". Do not modify existing rules. Only add if 2+ cover letters show a genuine pattern.
-- **`04-job-evaluation.md`:** Source is `job_posting.md` + `outcome.md` pairs. If an application reached interview or offer: note role type and sector as a confirmed strong-fit signal. If 2+ applications repeat a no-response or rejection pattern: note it. Add findings under "## Calibration from Past Applications". Do not modify the existing scoring framework.
-- **`05-cv-templates.md`:** Source is `cv_draft.tex` files. Extract any profile statement that does not already appear in templates. Label with: *[Used for: <company>_<role>]*. **Ground before extracting:** archived drafts are tailored outputs, not source documents - verify every factual claim in an extracted statement (titles, employers, metrics, technologies) against `01-candidate-profile.md` and drop or correct any claim the profile does not support, keeping only the framing. A tailored draft that drifted must never become a template future applications start from.
+- **`profiles/<name>/skills/02-behavioral-profile.md`:** Source is LinkedIn About + recommendation letters. Extract recurring themes, adjectives, phrases about how the candidate works. Add only to "Strongest Behavioral Traits", "How [Candidate] Works Best", or "Management Style Preferences" sections. Do not overwrite existing scored assessments. Always label inferred additions: *[Inferred from LinkedIn About / Reference letter - review before relying on this]*
+- **`profiles/<name>/skills/03-writing-style.md`:** Source is `cover_letter.tex` files. Extract recurring patterns. Add as observations under "## Patterns Observed in Past Applications". Do not modify existing rules. Only add if 2+ cover letters show a genuine pattern.
+- **`profiles/<name>/skills/04-job-evaluation.md`:** Source is `job_posting.md` + `outcome.md` pairs. If an application reached interview or offer: note role type and sector as a confirmed strong-fit signal. If 2+ applications repeat a no-response or rejection pattern: note it. Add findings under "## Calibration from Past Applications". Do not modify the existing scoring framework.
+- **`profile-statements.md`:** Source is `cv_draft.tex` files. Extract any profile statement that does not already appear in templates. Label with: *[Used for: <company>_<role>]*. **Ground before extracting:** archived drafts are tailored outputs, not source documents - verify every factual claim in an extracted statement (titles, employers, metrics, technologies) against `profiles/<name>/skills/01-candidate-profile.md` and drop or correct any claim the profile does not support, keeping only the framing. A tailored draft that drifted must never become a template future applications start from.
 - **`06-cover-letter-templates.md`:** Source is `cover_letter.tex` files. Extract opening patterns, bullet structures, closing formulations. Add only what is structurally distinct from existing templates.
-- **`07-interview-prep.md`:** Source is CV bullets, LinkedIn descriptions, reference letter quotes. Identify achievements not yet covered by an existing STAR example. Do NOT draft full STAR examples. Add stubs under "## STAR Candidates (Complete Manually)":
+- **`star-examples.md`:** Source is CV bullets, LinkedIn descriptions, reference letter quotes. Identify achievements not yet covered by an existing STAR example. Do NOT draft full STAR examples. Add stubs under "## STAR Candidates (Complete Manually)":
 
 ```markdown
 ### [Achievement title]
@@ -172,12 +180,12 @@ Present the full change set before writing anything.
 ```
 ## Proposed Additive Changes
 
-### 01-candidate-profile.md
+### profiles/<name>/skills/01-candidate-profile.md
 - [ ] New certification: [title], [issuer], [date] - extracted from LinkedIn
 - [ ] New reference: [name, title, company]
   Quote: "[relevant quote]"
 
-### 02-behavioral-profile.md
+### profiles/<name>/skills/02-behavioral-profile.md
 - [ ] New behavioral observation [labeled as inference]: "[phrase]"
 
 [and so on per file]
@@ -195,7 +203,7 @@ Wait for the response. Apply only the confirmed items.
 ```
 ## Conflict 1 of [N]: Job title - [COMPANY]
 
-**Current in 01-candidate-profile.md:**
+**Current in profiles/<name>/skills/01-candidate-profile.md:**
 [TITLE_A] - [COMPANY] ([START]-[END])
 
 **Proposed (from LinkedIn export):**
@@ -218,12 +226,12 @@ Documents cover skills, experience, education, references, and behavioral signal
 - Career goals and target role types
 - What excites the user in their next role
 - Deal-breakers and must-haves
-- Languages you work in professionally, with proficiency levels (only if not already extracted from `cv/` or `linkedin/` above) - this feeds the Language Gate in `04-job-evaluation.md`, so ask directly rather than skipping it
+- Languages you work in professionally, with proficiency levels (only if not already extracted from `cv/` or `linkedin/` above) - this feeds the Language Gate in `profiles/<name>/skills/04-job-evaluation.md`, so ask directly rather than skipping it
 - Salary expectations / baseline (optional)
 - Commute or location constraints (if not visible from CV)
 - Job search configuration (use the questions from Path C Section 9 below)
 
-Then proceed to Step 3 to populate the non-skill files (`CLAUDE.md`, `cv/main_example.tex`, `.claude/skills/job-scraper/search-queries.md`). Step 3 will detect that the seven skill files are already populated and skip those substeps.
+Then proceed to Step 3 to populate the non-skill files (`profiles/<name>/PROFILE.md`, `profiles/<name>/cv/main.tex`, `profiles/<name>/skills/search-queries.md`). Step 3 will detect that the seven skill files are already populated and skip those substeps.
 
 ---
 
@@ -315,7 +323,7 @@ Ask about:
 - **Target companies (optional):** "Are there specific companies you'd like to monitor for openings?"
 - **Geographic scope:** "Which cities or regions should I search in? How far are you willing to commute?" Use this to define the location filter tiers (ideal, acceptable, borderline, too far).
 - **Job portals:** "The framework ships country-agnostic search CLIs (`linkedin-search`, `freehire-search`, enabled by default) plus Danish portal demos (Jobindex, Jobbank, Jobdanmark, Jobnet) that ship **disabled**. `/scrape` auto-discovers whatever portal skills are installed under `.agents/skills/` and skips any with `enabled: false`. Which portals fit your market?" **Then act on the answer:** if the user's market is Denmark (or they ask for the Danish boards), edit each of the four Danish `SKILL.md` files and set `enabled: true` in the frontmatter; otherwise leave them disabled and say so - they cost nothing while disabled and can be enabled later by flipping the flag. If the user needs a local board that is not shipped, guide them to `/add-portal` (market-specific skills live in their fork). WebSearch/`site:` queries remain the fallback for portals without a CLI skill.
-- **CV language:** "Should your CVs be written in English (the default, accepted in most markets), or in your market's language?" Record the answer as a `CV language: <language>` line in CLAUDE.md's Identity section. Cover letters always match each posting's language automatically; this setting governs the CV only. If the user is unsure, keep English and note they can re-run `/setup --section search` to change it.
+- **CV language:** "Should your CVs be written in English (the default, accepted in most markets), or in your market's language?" Record the answer as a `CV language: <language>` line in `profiles/<name>/PROFILE.md`'s Identity section. Cover letters always match each posting's language automatically; this setting governs the CV only. If the user is unsure, keep English and note they can re-run `/setup --section search` to change it.
 
 **Important:** Also suggest role types the user may not have considered, based on their skill profile. For example:
 - If they have strong Python + domain expertise: "Have you considered roles like 'Technical Consultant' or 'Solutions Engineer' in your domain?"
@@ -330,16 +338,16 @@ This proactive suggestion step helps users discover career paths they might not 
 
 Once data collection is complete, generate or finish populating the following files. **For Path A**, the seven skill files are already populated by Step A7; check each before writing and skip if its content is no longer placeholder text.
 
-### 1. Update `CLAUDE.md`
-Replace all `[PLACEHOLDER]` tokens with the user's actual information. Keep the structure, workflow, and verification checklist intact.
+### 1. Write `profiles/<name>/PROFILE.md`
+Replace the placeholder identity block with the user's actual information: name, location, languages (with levels), employment status, and the other Identity-section fields. This is the only place the identity block is written — root `CLAUDE.md` holds no candidate data and is never touched by this step.
 
-### 2. Populate `01-candidate-profile.md` *(Path B and C; skip if Path A populated it)*
+### 2. Populate `profiles/<name>/skills/01-candidate-profile.md` *(Path B and C; skip if Path A populated it)*
 Write the full candidate profile with structured sections: Identity (including Languages, with levels), Education, Professional Experience, Independent Projects, Technical Skills, Publications, Awards, References.
 
-### 3. Populate `02-behavioral-profile.md` *(Path B and C; skip if Path A populated it)*
+### 3. Populate `profiles/<name>/skills/02-behavioral-profile.md` *(Path B and C; skip if Path A populated it)*
 Write the behavioral profile based on assessment results or synthesized answers.
 
-### 4. Update `04-job-evaluation.md` *(Path B and C; skip if Path A populated it)*
+### 4. Update `profiles/<name>/skills/04-job-evaluation.md` *(Path B and C; skip if Path A populated it)*
 Replace skill match areas with the user's actual skills:
 - Strong match areas: [their primary skills]
 - Moderate match areas: [their secondary skills]
@@ -347,16 +355,16 @@ Replace skill match areas with the user's actual skills:
 
 Update career goals and motivation filters with their actual preferences.
 
-### 5. Update `05-cv-templates.md` *(Path B and C; skip if Path A populated it)*
+### 5. Update `profiles/<name>/skills/profile-statements.md` *(Path B and C; skip if Path A populated it)*
 Add role-specific profile statement templates based on their background.
 
-### 6. Update `07-interview-prep.md` *(Path B and C; skip if Path A populated it)*
+### 6. Update `profiles/<name>/skills/star-examples.md` *(Path B and C; skip if Path A populated it)*
 Create STAR examples from their actual experience (at least 3-4 examples). Path A leaves STAR stubs under "## STAR Candidates (Complete Manually)" rather than full examples; if any stubs are present, mention them in Step 4 so the user knows to flesh them out.
 
-### 7. Update `cv/main_example.tex`
-Replace placeholder personal data with their actual name, contact info, and add their education and most recent experience entries.
+### 7. Write `profiles/<name>/cv/main.tex`
+Copy the structure from root `cv/main_example.tex` (never modify that file) and replace placeholder personal data with the candidate's actual name, contact info, education, and most recent experience entries. This is their master CV - `/apply` grounds tailored CVs against it.
 
-### 8. Generate `.claude/skills/job-scraper/search-queries.md`
+### 8. Generate `profiles/<name>/skills/search-queries.md`
 Replace all placeholder tokens in the search queries file with the user's actual information from Section 9 (or the equivalent follow-up questions in Path A's Step A7):
 - Replace `[YOUR_PRIMARY_ROLE_TYPE]`, `[YOUR_PRIMARY_JOB_TITLE]`, etc. with actual role titles
 - Replace `[YOUR_KEY_SKILL]`, `[YOUR_DOMAIN_KEYWORD_1]`, etc. with actual skills and domain terms
@@ -376,14 +384,14 @@ Present a summary:
 
 > **Setup complete!** Here's what was generated:
 >
-> - `CLAUDE.md` - Your full candidate profile
-> - `.claude/skills/job-application-assistant/01-candidate-profile.md` - Structured profile
-> - `.claude/skills/job-application-assistant/02-behavioral-profile.md` - Behavioral assessment
-> - `.claude/skills/job-application-assistant/04-job-evaluation.md` - Personalized evaluation framework
-> - `.claude/skills/job-application-assistant/05-cv-templates.md` - CV templates with your profile statements
-> - `.claude/skills/job-application-assistant/07-interview-prep.md` - STAR examples from your experience
-> - `cv/main_example.tex` - Your LaTeX CV template
-> - `.claude/skills/job-scraper/search-queries.md` - Job search queries for `/scrape`
+> - `profiles/<name>/PROFILE.md` - Your identity block (root `CLAUDE.md` holds no candidate data)
+> - `profiles/<name>/skills/01-candidate-profile.md` - Structured profile
+> - `profiles/<name>/skills/02-behavioral-profile.md` - Behavioral assessment
+> - `profiles/<name>/skills/04-job-evaluation.md` - Personalized evaluation framework
+> - `profiles/<name>/skills/profile-statements.md` - Your profile statement templates
+> - `profiles/<name>/skills/star-examples.md` - STAR examples from your experience
+> - `profiles/<name>/cv/main.tex` - Your master LaTeX CV
+> - `profiles/<name>/skills/search-queries.md` - Job search queries for `/scrape`
 >
 > **Privacy note:** the files above now contain your personal data and are *tracked by git*.
 > A GitHub fork of the template is always public (forks of public repos cannot be made
@@ -395,15 +403,15 @@ Present a summary:
 > - Run `/apply` with a job posting URL to see the full application workflow
 > - Run `/setup --section search` later to update your search queries as your priorities evolve
 
-If Path A left any STAR stubs in `07-interview-prep.md`, also note:
+If Path A left any STAR stubs in `star-examples.md`, also note:
 
-> Path A flagged [N] STAR candidate stubs in `07-interview-prep.md` that need your situation/task/action/result details before you use them in interviews.
+> Path A flagged [N] STAR candidate stubs in `profiles/<name>/skills/star-examples.md` that need your situation/task/action/result details before you use them in interviews.
 
 ---
 
 ## Design Principles
 
-- Three onboarding paths converge on the same skill files. Step 0 picks the right path based on what's in `documents/`. Steps 3 and 4 are shared.
+- Three onboarding paths converge on the same skill files. Step 0 picks the right path based on what's in `profiles/<name>/documents/`. Steps 3 and 4 are shared.
 - Path A is read-before-write and idempotent. Re-running it as documents are added does not duplicate or overwrite existing content; conflicts are surfaced for explicit resolution.
 - Path A labels inferred behavioral or style additions so the user can review them critically before relying on them.
 - Each section in Path C is a natural conversation, not a form. The user can skip optional sections.

@@ -15,9 +15,13 @@ allowed-tools: Read, Write, Glob, Grep, WebFetch, WebSearch
 
 `/upskill` analyses jobs you have tracked and your current profile to identify skill gaps, then produces a heatmap of those gaps and a learning plan with concrete, web-searched study resources and a recommended study order.
 
+**Profile:** resolve the active candidate profile per `.claude/PROFILES.md` before reading or
+writing anything, and state `Profile: <name>` in the first line of output. `<name>` in the paths
+below is that resolved profile.
+
 ## Invocation
 
-- **`/upskill`** — aggregate mode: analyses all jobs in `job_search_tracker.csv`, merged with ranked postings (`rank_score >= 45`) from `job_scraper/seen_jobs.json`
+- **`/upskill`** — aggregate mode: analyses all jobs in `profiles/<name>/tracker.csv`, merged with ranked postings (`rank_score >= 45`) from `profiles/<name>/job_scraper/seen_jobs.json`
 - **`/upskill <URL>`** — targeted mode: analyses a single job posting fetched from the URL
 
 ---
@@ -34,17 +38,17 @@ In targeted mode, derive a slug from the job title and company for the report fi
 ## Step 2: Load Data
 
 ### Aggregate mode
-1. Read `job_search_tracker.csv`. Extract all rows. The columns are:
+1. Read `profiles/<name>/tracker.csv`. Extract all rows. The columns are:
    `date, company, sector, role, role_type, channel, status, contact_person, fit_rating, notes, cv_file, cover_letter_file, source`
 2. For each row, note the `role`, `company`, and `fit_rating`. The `fit_rating` column is a 0–100 score where 100 = perfect fit. You will use it to weight gaps — a lower fit rating means the role exposed more gaps.
-3. Read `job_scraper/seen_jobs.json`. Keep entries with `"status": "ranked"` and `rank_score >= 45` — the Moderate Fit floor from `04-job-evaluation.md` (below that, a job is Weak/Poor Fit and would otherwise dominate the heatmap with jobs the user shouldn't chase). For each kept entry, note its `title`, `company`, `rank_score`, and — when present — its recorded `gaps`. An entry with no `gaps` field (ranked before gap persistence existed) is skipped, counted, and reported once in the terminal: *"N ranked jobs were scored before gap persistence and contribute nothing; `/rank --all` re-scores them."* Never back-fill a missing `gaps` field by guessing from the title.
-4. Read `.claude/skills/job-application-assistant/01-candidate-profile.md` to get the candidate's current skills and experience.
-5. Check `upskill/` for the most recent aggregate report file (`report-YYYY-MM-DD.md`) — if one exists, note its date and load it for the diff in Step 8.
+3. Read `profiles/<name>/job_scraper/seen_jobs.json`. Keep entries with `"status": "ranked"` and `rank_score >= 45` — the Moderate Fit floor from `04-job-evaluation.md` (below that, a job is Weak/Poor Fit and would otherwise dominate the heatmap with jobs the user shouldn't chase). For each kept entry, note its `title`, `company`, `rank_score`, and — when present — its recorded `gaps`. An entry with no `gaps` field (ranked before gap persistence existed) is skipped, counted, and reported once in the terminal: *"N ranked jobs were scored before gap persistence and contribute nothing; `/rank --all` re-scores them."* Never back-fill a missing `gaps` field by guessing from the title.
+4. Read `profiles/<name>/skills/01-candidate-profile.md` to get the candidate's current skills and experience.
+5. Check `profiles/<name>/upskill/` for the most recent aggregate report file (`report-YYYY-MM-DD.md`) — if one exists, note its date and load it for the diff in Step 8.
 
 ### Targeted mode
 1. Use WebFetch to retrieve the job posting from the URL.
 2. Extract: job title, company, required skills, preferred skills, responsibilities, and any domain context.
-3. Read `.claude/skills/job-application-assistant/01-candidate-profile.md` for the candidate's current skills.
+3. Read `profiles/<name>/skills/01-candidate-profile.md` for the candidate's current skills.
 4. No tracker data is used in targeted mode.
 
 ## Step 3: Pass 1 — Hard Skill Diff
@@ -223,10 +227,10 @@ Study direction: ...
 
 ### Save the report
 
-- **Aggregate:** `upskill/report-YYYY-MM-DD.md`
-- **Targeted:** `upskill/report-YYYY-MM-DD-<company-slug>-<role-slug>.md`
+- **Aggregate:** `profiles/<name>/upskill/report-YYYY-MM-DD.md`
+- **Targeted:** `profiles/<name>/upskill/report-YYYY-MM-DD-<company-slug>-<role-slug>.md`
   - Slugify: lowercase, spaces → hyphens, strip special characters
-  - Example: `upskill/report-2026-04-20-guardsix-senior-ai-engineer.md`
+  - Example: `profiles/<name>/upskill/report-2026-04-20-guardsix-senior-ai-engineer.md`
 
 Use the Write tool to save the file.
 
@@ -241,13 +245,13 @@ If no previous report exists, omit the "Since Last Report" section entirely.
 ### Confirm to user
 
 After saving, print:
-> "Report saved to `upskill/<filename>.md`. Review it anytime to track your learning progress."
+> "Report saved to `profiles/<name>/upskill/<filename>.md`. Review it anytime to track your learning progress."
 
 ## Important Rules
 
 1. **Never fabricate resources.** Only cite resources found via actual WebSearch results. Do not invent course names, URLs, or authors.
 2. **Search with the current year.** Include the year in every WebSearch query for resources so results stay fresh.
-3. **Targeted mode ignores both state files.** In targeted mode, analyse only the fetched posting. Do not load or reference `job_search_tracker.csv` or `job_scraper/seen_jobs.json` — both are aggregate-mode-only inputs.
+3. **Targeted mode ignores both state files.** In targeted mode, analyse only the fetched posting. Do not load or reference `profiles/<name>/tracker.csv` or `profiles/<name>/job_scraper/seen_jobs.json` — both are aggregate-mode-only inputs.
 4. **Be generous with profile matching.** If a skill appears in the candidate profile in any form, do not flag it as a gap. Avoid false positives.
 5. **Print the heatmap before the learning plan.** Always show the intermediate heatmap table in the terminal before proceeding to resource search, so the user can see what you are working from.
 6. **Omit Low-priority gaps from the learning plan.** List them in the heatmap for completeness, but do not generate study resources for them unless the user asks.

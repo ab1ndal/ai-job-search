@@ -67,6 +67,10 @@ REQUIRED_IGNORE_RULES = [
     "documents/postings/**",
     "documents/interview/**",
     "job_search_tracker.csv",
+    # Per-candidate data lives under profiles/<name>/; the root-relative rules
+    # above do not match it. The pointer file names the active candidate.
+    "profiles/",
+    ".active-profile",
     "gmail_sync/",
     "reports/",
     "upskill/*.md",

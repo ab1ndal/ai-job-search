@@ -201,7 +201,7 @@ Then run the onboarding:
 
 Claude will offer three paths:
 
-- **Path A (documents folder):** Add your CV, LinkedIn export, diplomas, references, or past applications under `documents/`. Claude reads and cross-references them before proposing profile updates. This is best when you have several source files.
+- **Path A (documents folder):** Add your CV, LinkedIn export, diplomas, references, or past applications under `profiles/<name>/documents/`. Claude reads and cross-references them before proposing profile updates. This is best when you have several source files.
 - **Path B (single CV import):** Share one CV/resume by mentioning the file with `@` or pasting the text. Claude extracts it and asks follow-up questions for anything missing.
 - **Path C (interview mode):** Answer structured interview questions section by section.
 
@@ -211,14 +211,17 @@ All three paths produce the same result: fully populated profile files.
 
 | File | Content |
 |------|---------|
-| `CLAUDE.md` | Your full candidate profile |
-| `01-candidate-profile.md` | Structured education, experience, skills |
-| `02-behavioral-profile.md` | Behavioral assessment |
-| `04-job-evaluation.md` | Personalized skill match areas and career goals |
-| `05-cv-templates.md` | Profile statement templates for your background |
-| `07-interview-prep.md` | STAR examples from your experience |
-| `cv/main_example.tex` | Your LaTeX CV with actual details |
-| `search-queries.md` | Job search queries for `/scrape` |
+| `profiles/<name>/PROFILE.md` | Your identity block (name, location, languages, CV language, status) |
+| `profiles/<name>/skills/01-candidate-profile.md` | Structured education, experience, skills |
+| `profiles/<name>/skills/02-behavioral-profile.md` | Behavioral assessment |
+| `profiles/<name>/skills/04-job-evaluation.md` | Personalized skill match areas and career goals |
+| `profiles/<name>/skills/profile-statements.md` | Profile statement templates for your background |
+| `profiles/<name>/skills/star-examples.md` | STAR examples from your experience |
+| `profiles/<name>/cv/main.tex` | Your master LaTeX CV with actual details |
+| `profiles/<name>/skills/search-queries.md` | Job search queries for `/scrape` |
+
+`CLAUDE.md` holds only repo-wide instructions and the verification checklist — `/setup` never
+writes candidate data there.
 
 ### Re-running setup
 
@@ -271,16 +274,30 @@ Claude will:
 After `/apply` creates the LaTeX files:
 
 ```bash
-# Bash / zsh / Git Bash
-cd cv && lualatex main_<company>_<role>.tex && cd ..
-cd cover_letters && xelatex cover_<company>_<role>.tex && cd ..
+# Bash / zsh / Git Bash — run from the repo root
+lualatex -interaction=nonstopmode -output-directory=profiles/<name>/cv \
+    profiles/<name>/cv/main_<company>_<role>.tex
+
+TEXINPUTS=./cover_letters: OSFONTDIR=./cover_letters/ xelatex -interaction=nonstopmode \
+    -output-directory=profiles/<name>/cover_letters \
+    profiles/<name>/cover_letters/cover_<company>_<role>.tex
 ```
 
 ```powershell
-# PowerShell
-Set-Location cv; lualatex main_<company>_<role>.tex; Set-Location ..
-Set-Location cover_letters; xelatex cover_<company>_<role>.tex; Set-Location ..
+# PowerShell — run from the repo root
+lualatex -interaction=nonstopmode -output-directory=profiles/<name>/cv `
+    profiles/<name>/cv/main_<company>_<role>.tex
+
+$env:TEXINPUTS = ".\cover_letters;"; $env:OSFONTDIR = ".\cover_letters\"
+xelatex -interaction=nonstopmode -output-directory=profiles/<name>/cover_letters `
+    profiles/<name>/cover_letters/cover_<company>_<role>.tex
 ```
+
+`cover.cls` and its bundled fonts stay shared at `cover_letters/` while the generated documents
+live under `profiles/<name>/`, so both commands run from the repo root rather than `cd`-ing into
+either directory. `TEXINPUTS` lets `xelatex` find `cover.cls`; `OSFONTDIR` adds `cover_letters/` as
+a font search root so `cover.cls`'s relative `Path = OpenFonts/fonts/...` strings resolve under it
+— those strings are load-bearing and must not be edited.
 
 These commands apply to the stock templates (moderncv CV, `cover.cls` cover letter). If you'd rather use your own LaTeX template, run `/add-template` — it captures the template's compile engine, fonts, style rules, and page limit, test-compiles it, and wires it into `/apply`. See the "LaTeX templates" section in the README.
 
@@ -290,7 +307,7 @@ Upstream keeps improving the methodology files your fork has personalized, so pl
 
 **Prefer releases over raw `master`.** Tagged [releases](../../releases) are vetted checkpoints, each described in [CHANGELOG.md](CHANGELOG.md). Updating to a tag pulls a stable, documented state instead of whatever `master` happens to be mid-review. Fetch tags with `git fetch upstream --tags` and merge a release (for example `git merge v1.0.0`) when you want stability; pull `master` directly only when you specifically want the latest unreleased changes. The steps below apply either way - substitute the release tag for `upstream/master` where you see it.
 
-1. **Commit your personalization - but know where those commits land.** `/setup` edits CLAUDE.md and the profile skill files in place; those edits are *yours*, and committing them is what lets updates merge cleanly. But a GitHub **fork of this repo is public** - forks of public repositories cannot be made private - so anything you commit *and push to a fork* is visible to anyone. If you want your profile in a remote at all, don't push it to a fork: create a **private** repository, push there, and add this repo as the `upstream` remote (`git remote add upstream https://github.com/MadsLorentzen/ai-job-search.git`) to keep receiving updates. Committing locally without pushing is also fine. The genuinely sensitive files (tracker, salary data, `documents/`, application archives) are gitignored and never enter git either way. An uncommitted working tree is the most common reason `git pull` refuses to merge at all (`Your local changes ... would be overwritten`).
+1. **Commit your personalization - but know where those commits land.** `/setup` edits your `profiles/<name>/` files (`PROFILE.md` and the profile skill files) in place; those edits are *yours*, and committing them is what lets updates merge cleanly. But a GitHub **fork of this repo is public** - forks of public repositories cannot be made private - so anything you commit *and push to a fork* is visible to anyone. If you want your profile in a remote at all, don't push it to a fork: create a **private** repository, push there, and add this repo as the `upstream` remote (`git remote add upstream https://github.com/MadsLorentzen/ai-job-search.git`) to keep receiving updates. Committing locally without pushing is also fine. The genuinely sensitive files (tracker, salary data, `profiles/<name>/documents/`, application archives) are gitignored and never enter git either way. An uncommitted working tree is the most common reason `git pull` refuses to merge at all (`Your local changes ... would be overwritten`).
 2. **Preview what changed before pulling:**
    ```bash
    git remote add upstream https://github.com/MadsLorentzen/ai-job-search.git   # first time only, if you cloned your own fork

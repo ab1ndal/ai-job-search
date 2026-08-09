@@ -6,12 +6,16 @@ Follow these steps **exactly in order**. Do not skip steps.
 
 ---
 
-## Step 0: Read Existing Profile Files
+## Step 0: Resolve Profile and Read Existing Profile Files
+
+**Profile:** resolve the active candidate profile per `.claude/PROFILES.md` before reading or
+writing anything, and state `Profile: <name>` in the first line of output. `<name>` in the paths
+below is that resolved profile.
 
 Read these two files in parallel before doing anything else. You must know what is already there so you do not propose duplicates.
 
-- `.claude/skills/job-application-assistant/01-candidate-profile.md`
-- `.claude/skills/job-application-assistant/02-behavioral-profile.md`
+- `profiles/<name>/skills/01-candidate-profile.md`
+- `profiles/<name>/skills/02-behavioral-profile.md`
 
 Hold this content in context throughout the command. Do not re-read these files later.
 
@@ -21,35 +25,35 @@ Hold this content in context throughout the command. Do not re-read these files 
 
 Scan every available source for "experience items" — anything that implies skill, knowledge, or competency. Process sources in this order.
 
-### 1a. documents/cv/
-Read all files in `documents/cv/`. Extract:
+### 1a. profiles/<name>/documents/cv/
+Read all files in `profiles/<name>/documents/cv/`. Extract:
 - Every course or module listed (including university coursework and online courses)
 - Every certification mentioned, with issuer and date
 - Every job responsibility bullet point (tools, methods, outcomes)
 - Every independent project or side project
 - Every volunteer or extracurricular role
 
-### 1b. documents/linkedin/
-Read all files in `documents/linkedin/`. Extract:
+### 1b. profiles/<name>/documents/linkedin/
+Read all files in `profiles/<name>/documents/linkedin/`. Extract:
 - Courses and certifications in the "Licenses & Certifications" section
 - Skills and endorsements list
 - Volunteer experiences
 - Projects section
 - Any platform-specific items not already found in the CV
 
-### 1c. documents/diplomas/
-Read all files in `documents/diplomas/`. Extract:
+### 1c. profiles/<name>/documents/diplomas/
+Read all files in `profiles/<name>/documents/diplomas/`. Extract:
 - All course/module names listed on transcripts
 - Thesis title and subject area
 - Any specialisation or track name
 
-### 1d. documents/references/
-Read all files in `documents/references/`. Extract:
+### 1d. profiles/<name>/documents/references/
+Read all files in `profiles/<name>/documents/references/`. Extract:
 - Competency language used by the referee (what skills or qualities they mention)
 - Any specific projects, tools, or methods named
 
 ### 1e. GitHub Profile
-Look up the GitHub username from `01-candidate-profile.md`. If a GitHub URL or username is present:
+Look up the GitHub username from `profiles/<name>/skills/01-candidate-profile.md`. If a GitHub URL or username is present:
 
 1. Use WebFetch or WebSearch to retrieve the public profile and pinned repositories
 2. For each repository found:
@@ -60,7 +64,7 @@ Look up the GitHub username from `01-candidate-profile.md`. If a GitHub URL or u
 If no GitHub username or URL is found in the profile, skip this source and note it was skipped.
 
 ### 1f. Other URLs in Profile
-Check `01-candidate-profile.md` for any other URLs (portfolio site, personal website, Kaggle, Google Scholar, ResearchGate, publication links). For each:
+Check `profiles/<name>/skills/01-candidate-profile.md` for any other URLs (portfolio site, personal website, Kaggle, Google Scholar, ResearchGate, publication links). For each:
 - Fetch the page
 - Extract any tools, methods, datasets, awards, or skills mentioned
 
@@ -114,7 +118,7 @@ For each competency, record:
 - The source item it came from (e.g. "Coursera — Deep Learning Specialisation", "GitHub — repo-name", "Reference letter — Jens Jensen")
 - Whether it came from direct lookup (A), inference (B), or both
 
-Remove anything already present in `01-candidate-profile.md` or `02-behavioral-profile.md`.
+Remove anything already present in `profiles/<name>/skills/01-candidate-profile.md` or `profiles/<name>/skills/02-behavioral-profile.md`.
 
 ---
 
@@ -168,14 +172,14 @@ Wait for the user's response before writing anything.
 
 Apply only the confirmed items. Use the Edit tool to add to the relevant sections of each file — do not rewrite entire files.
 
-### Additions to `01-candidate-profile.md`
+### Additions to `profiles/<name>/skills/01-candidate-profile.md`
 - Technical skills (primary and secondary) → append to the Technical Skills section
 - Domain knowledge → append to the Domain Knowledge or Technical Skills section (match the existing structure)
 - Methods and practices → append appropriately
 
 For each addition, add a brief source annotation in a comment or parenthetical: *(Coursera — Deep Learning Specialisation)*, *(GitHub — project-name)*, etc. This makes future `/expand` runs idempotent.
 
-### Additions to `02-behavioral-profile.md`
+### Additions to `profiles/<name>/skills/02-behavioral-profile.md`
 - Soft/behavioral signals → append to the "Strongest Behavioral Traits" or "How I Work Best" section (match existing structure)
 - Always label inferred behavioral additions: *[Inferred from reference letter — Name / review before relying on this]*
 
@@ -188,10 +192,10 @@ After writing, present:
 ```
 ## /expand Complete
 
-### Added to 01-candidate-profile.md
+### Added to profiles/<name>/skills/01-candidate-profile.md
 [List each competency added, with source]
 
-### Added to 02-behavioral-profile.md
+### Added to profiles/<name>/skills/02-behavioral-profile.md
 [List each behavioral signal added, with source]
 
 ### Sources processed

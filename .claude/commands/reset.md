@@ -4,14 +4,22 @@ You are resetting parts of the job search framework back to a blank state so the
 
 **This command is destructive.** Nothing is deleted until the user explicitly confirms. Follow these steps exactly in order.
 
+**Every deletion in this command is scoped to the single resolved profile below. `/reset` never
+touches another profile's directory** — it reads and writes only inside `profiles/<name>/`, never
+`profiles/<other-name>/`, regardless of scope.
+
 ---
 
-## Step 0: Parse Scope from Arguments
+## Step 0: Resolve Profile, then Parse Scope from Arguments
+
+**Profile:** resolve the active candidate profile per `.claude/PROFILES.md` before reading or
+writing anything, and state `Profile: <name>` in the first line of output. `<name>` in the paths
+below is that resolved profile. Every step that follows operates only inside `profiles/<name>/`.
 
 Check `$ARGUMENTS` for a scope keyword:
 
 - `profile` — clears candidate profile data from skill files only
-- `documents` — deletes user-provided files from the `documents/` folder only
+- `documents` — deletes user-provided files from the `profiles/<name>/documents/` folder only
 - `all` — both of the above
 
 If `$ARGUMENTS` is empty or does not contain a recognized scope keyword, ask:
@@ -20,7 +28,7 @@ If `$ARGUMENTS` is empty or does not contain a recognized scope keyword, ask:
 >
 > - **`profile`** — Clears candidate data from the skill files (profile, behavioral, STAR examples, profile statements). The framework structure and writing rules are preserved. Use this to re-run `/setup` from scratch.
 >
-> - **`documents`** — Deletes all files you've placed in the `documents/` folder (CV PDFs, LinkedIn export, diplomas, references, past applications). The folder structure and `README.md` are preserved.
+> - **`documents`** — Deletes all files you've placed in the `profiles/<name>/documents/` folder (CV PDFs, LinkedIn export, diplomas, references, past applications). The folder structure is preserved.
 >
 > - **`all`** — Both of the above.
 >
@@ -38,57 +46,64 @@ Before doing anything, show the user precisely what will be wiped.
 
 Read the current state of these files and report whether each has content or is already empty:
 
-- `.claude/skills/job-application-assistant/01-candidate-profile.md`
-- `.claude/skills/job-application-assistant/02-behavioral-profile.md`
-- `.claude/skills/job-application-assistant/05-cv-templates.md` *(profile statements section only — framework structure is preserved)*
-- `.claude/skills/job-application-assistant/07-interview-prep.md` *(STAR examples and STAR candidates sections only — framework structure is preserved)*
+- `profiles/<name>/skills/01-candidate-profile.md`
+- `profiles/<name>/skills/02-behavioral-profile.md`
+- `profiles/<name>/skills/profile-statements.md`
+- `profiles/<name>/skills/star-examples.md`
+- `profiles/<name>/cv/main.tex` *(deleted, not just blanked — it's a generated file, not a template)*
 
 Present as:
 
 ```
-## Profile reset will clear:
+## Profile reset will clear (profile: <name>):
 
-- 01-candidate-profile.md — [has content / already empty]
+- profiles/<name>/skills/01-candidate-profile.md — [has content / already empty]
   Full file will be replaced with a blank template.
 
-- 02-behavioral-profile.md — [has content / already empty]
+- profiles/<name>/skills/02-behavioral-profile.md — [has content / already empty]
   Full file will be replaced with a blank template.
 
-- 05-cv-templates.md — [has profile statements / already blank]
-  Profile statement templates will be cleared. LaTeX structure and tailoring guidelines are preserved.
+- profiles/<name>/skills/profile-statements.md — [has profile statements / already blank]
+  Full file will be replaced with a blank template.
 
-- 07-interview-prep.md — [has STAR examples / already blank]
-  STAR examples and any STAR candidate stubs will be cleared. Framework, tough questions, and roleplay guidelines are preserved.
+- profiles/<name>/skills/star-examples.md — [has STAR examples / already blank]
+  Full file will be replaced with a blank template.
+
+- profiles/<name>/cv/main.tex — [exists / already absent]
+  Will be deleted. Re-run /setup to regenerate it from cv/main_example.tex.
 
 The following files are NOT touched (they contain framework rules, not candidate data):
   - 03-writing-style.md
   - 04-job-evaluation.md
-  - 06-cover-letter-templates.md
+  - .claude/skills/job-application-assistant/05-cv-templates.md
+  - .claude/skills/job-application-assistant/06-cover-letter-templates.md
+  - .claude/skills/job-application-assistant/07-interview-prep.md
+  - cv/main_example.tex (repo-root placeholder master)
 ```
 
 ### If scope includes `documents`:
 
-Use Glob to list all files present in `documents/cv/`, `documents/linkedin/`, `documents/diplomas/`, `documents/references/`, and `documents/applications/`. Present as:
+Use Glob to list all files present in `profiles/<name>/documents/cv/`, `profiles/<name>/documents/linkedin/`, `profiles/<name>/documents/diplomas/`, `profiles/<name>/documents/references/`, and `profiles/<name>/documents/applications/`. Present as:
 
 ```
-## Documents reset will delete:
+## Documents reset will delete (profile: <name>):
 
-documents/cv/
+profiles/<name>/documents/cv/
   - [filename] or "(empty)"
 
-documents/linkedin/
+profiles/<name>/documents/linkedin/
   - [filename] or "(empty)"
 
-documents/diplomas/
+profiles/<name>/documents/diplomas/
   - [filename] or "(empty)"
 
-documents/references/
+profiles/<name>/documents/references/
   - [filename] or "(empty)"
 
-documents/applications/
+profiles/<name>/documents/applications/
   - [subfolder/filename] or "(empty)"
 
-documents/README.md — NOT deleted (instructions file)
+documents/README.md — NOT deleted (shared instructions file, outside any profile)
 ```
 
 If all document subfolders are already empty, state "All document subfolders are already empty — nothing to delete." and skip the confirmation step for this scope.
@@ -97,16 +112,18 @@ If all document subfolders are already empty, state "All document subfolders are
 
 ## Step 2: Require Explicit Confirmation
 
-Present the confirmation prompt:
+Present the confirmation prompt, echoing the resolved profile name so the user can see exactly which candidate's data is about to be wiped before anything is deleted:
 
-> **This cannot be undone.**
+> **This cannot be undone. Profile: `<name>`.**
 >
-> Type **`RESET`** (all caps) to confirm, or anything else to cancel.
+> This will only affect `profiles/<name>/` — no other profile's data is touched.
+>
+> Type **`RESET <name>`** (matching the profile name above) to confirm, or anything else to cancel.
 
 Wait for the user's response.
 
-- If the user types exactly `RESET`: proceed to Step 3.
-- If the user types anything else: abort and tell them "Reset cancelled. Nothing was changed."
+- If the user types exactly `RESET <name>` with `<name>` matching the resolved profile: proceed to Step 3.
+- If the user types anything else, including `RESET` alone or `RESET` with a different profile name: abort and tell them "Reset cancelled. Nothing was changed."
 
 ---
 
@@ -114,7 +131,7 @@ Wait for the user's response.
 
 ### Profile reset
 
-**For `01-candidate-profile.md`**, replace the file content with:
+**For `profiles/<name>/skills/01-candidate-profile.md`**, replace the file content with:
 
 ```markdown
 # Candidate Profile
@@ -138,7 +155,7 @@ Wait for the user's response.
 ## References
 ```
 
-**For `02-behavioral-profile.md`**, replace the file content with:
+**For `profiles/<name>/skills/02-behavioral-profile.md`**, replace the file content with:
 
 ```markdown
 # Behavioral Profile
@@ -160,40 +177,46 @@ Wait for the user's response.
 ## Using This in Applications
 ```
 
-**For `05-cv-templates.md`**, locate the section that begins with `**Profile statement templates` and extends through the role-specific template blocks. Replace only that section with:
+**For `profiles/<name>/skills/profile-statements.md`**, replace the file content with:
 
 ```markdown
+# Profile Statements
+
+<!-- Run /setup to populate role-specific profile statements -->
+
 **Profile statement templates:**
 
 <!-- Run /setup to populate role-specific profile statements -->
 ```
 
-Leave all other content in `05-cv-templates.md` intact.
-
-**For `07-interview-prep.md`**, locate and remove:
-- The entire `## Ready-Made STAR Examples` section and all numbered STAR examples under it
-- Any `## STAR Candidates (Complete Manually)` section added by `/setup` Path A
-
-Replace with:
+**For `profiles/<name>/skills/star-examples.md`**, replace the file content with:
 
 ```markdown
+# STAR Examples
+
+<!-- Run /setup to populate STAR examples from your actual experience -->
+
 ## Ready-Made STAR Examples
 
 <!-- Run /setup to populate STAR examples from your actual experience -->
+
+## STAR Candidates (Complete Manually)
+
+<!-- /setup Path A adds stubs here for achievements not yet covered by a full STAR example. -->
 ```
 
-Leave all other content in `07-interview-prep.md` intact (STAR format explanation, tough questions, questions to ask interviewers, phone/video tips, follow-up etiquette, roleplay guidelines).
+**For `profiles/<name>/cv/main.tex`**, delete the file if present (`rm -f profiles/<name>/cv/main.tex`). It is a generated artifact, not a template — `/setup` recreates it from root `cv/main_example.tex`.
 
 ### Documents reset
 
-For each non-empty document subfolder, delete all files within it using Bash `rm`. Do not delete the folder itself, and do not delete `documents/README.md`.
+For each non-empty document subfolder, delete all files within it using Bash `rm`, scoped strictly to `profiles/<name>/documents/`. Do not delete the folder itself, do not delete `documents/README.md` (shared, outside any profile), and never touch `profiles/<other-name>/documents/`.
 
 ```bash
-rm -f documents/cv/*
-rm -f documents/linkedin/*
-rm -f documents/diplomas/*
-rm -f documents/references/*
-rm -rf documents/applications/*/
+rm -f profiles/<name>/documents/cv/*
+rm -f profiles/<name>/documents/linkedin/*
+rm -f profiles/<name>/documents/diplomas/*
+rm -f profiles/<name>/documents/references/*
+rm -rf profiles/<name>/documents/applications/*/
 ```
 
 ---
@@ -215,10 +238,10 @@ After the reset is complete, report:
 Then tell the user what to do next based on what was reset:
 
 **If profile was reset:**
-> Your candidate profile is now blank. Run `/setup` to repopulate it. The command auto-detects any files in your `documents/` folder and offers to read from there; otherwise it walks you through a CV import or interactive interview.
+> Your candidate profile is now blank. Run `/setup` to repopulate it. The command auto-detects any files in your `profiles/<name>/documents/` folder and offers to read from there; otherwise it walks you through a CV import or interactive interview.
 
 **If documents were reset:**
-> The `documents/` folder is now empty. Add your career documents and run `/setup` to populate your profile. See `documents/README.md` for instructions on what to put where.
+> The `profiles/<name>/documents/` folder is now empty. Add your career documents and run `/setup` to populate your profile. See `documents/README.md` for instructions on what to put where.
 
 **If both were reset:**
-> Both your profile files and documents folder are now empty. Add documents to `documents/` (or skip and use the CV import / interview path), then run `/setup`.
+> Both your profile files and documents folder are now empty. Add documents to `profiles/<name>/documents/` (or skip and use the CV import / interview path), then run `/setup`.
