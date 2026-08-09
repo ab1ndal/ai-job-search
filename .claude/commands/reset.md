@@ -48,8 +48,9 @@ Read the current state of these files and report whether each has content or is 
 
 - `profiles/<name>/skills/01-candidate-profile.md`
 - `profiles/<name>/skills/02-behavioral-profile.md`
-- `.claude/skills/job-application-assistant/05-cv-templates.md` *(profile statements section only — framework structure is preserved)*
-- `.claude/skills/job-application-assistant/07-interview-prep.md` *(STAR examples and STAR candidates sections only — framework structure is preserved)*
+- `profiles/<name>/skills/profile-statements.md`
+- `profiles/<name>/skills/star-examples.md`
+- `profiles/<name>/cv/main.tex` *(deleted, not just blanked — it's a generated file, not a template)*
 
 Present as:
 
@@ -62,16 +63,22 @@ Present as:
 - profiles/<name>/skills/02-behavioral-profile.md — [has content / already empty]
   Full file will be replaced with a blank template.
 
-- 05-cv-templates.md — [has profile statements / already blank]
-  Profile statement templates will be cleared. LaTeX structure and tailoring guidelines are preserved.
+- profiles/<name>/skills/profile-statements.md — [has profile statements / already blank]
+  Full file will be replaced with a blank template.
 
-- 07-interview-prep.md — [has STAR examples / already blank]
-  STAR examples and any STAR candidate stubs will be cleared. Framework, tough questions, and roleplay guidelines are preserved.
+- profiles/<name>/skills/star-examples.md — [has STAR examples / already blank]
+  Full file will be replaced with a blank template.
+
+- profiles/<name>/cv/main.tex — [exists / already absent]
+  Will be deleted. Re-run /setup to regenerate it from cv/main_example.tex.
 
 The following files are NOT touched (they contain framework rules, not candidate data):
   - 03-writing-style.md
   - 04-job-evaluation.md
-  - 06-cover-letter-templates.md
+  - .claude/skills/job-application-assistant/05-cv-templates.md
+  - .claude/skills/job-application-assistant/06-cover-letter-templates.md
+  - .claude/skills/job-application-assistant/07-interview-prep.md
+  - cv/main_example.tex (repo-root placeholder master)
 ```
 
 ### If scope includes `documents`:
@@ -170,29 +177,35 @@ Wait for the user's response.
 ## Using This in Applications
 ```
 
-**For `05-cv-templates.md`**, locate the section that begins with `**Profile statement templates` and extends through the role-specific template blocks. Replace only that section with:
+**For `profiles/<name>/skills/profile-statements.md`**, replace the file content with:
 
 ```markdown
+# Profile Statements
+
+<!-- Run /setup to populate role-specific profile statements -->
+
 **Profile statement templates:**
 
 <!-- Run /setup to populate role-specific profile statements -->
 ```
 
-Leave all other content in `05-cv-templates.md` intact.
-
-**For `07-interview-prep.md`**, locate and remove:
-- The entire `## Ready-Made STAR Examples` section and all numbered STAR examples under it
-- Any `## STAR Candidates (Complete Manually)` section added by `/setup` Path A
-
-Replace with:
+**For `profiles/<name>/skills/star-examples.md`**, replace the file content with:
 
 ```markdown
+# STAR Examples
+
+<!-- Run /setup to populate STAR examples from your actual experience -->
+
 ## Ready-Made STAR Examples
 
 <!-- Run /setup to populate STAR examples from your actual experience -->
+
+## STAR Candidates (Complete Manually)
+
+<!-- /setup Path A adds stubs here for achievements not yet covered by a full STAR example. -->
 ```
 
-Leave all other content in `07-interview-prep.md` intact (STAR format explanation, tough questions, questions to ask interviewers, phone/video tips, follow-up etiquette, roleplay guidelines).
+**For `profiles/<name>/cv/main.tex`**, delete the file if present (`rm -f profiles/<name>/cv/main.tex`). It is a generated artifact, not a template — `/setup` recreates it from root `cv/main_example.tex`.
 
 ### Documents reset
 

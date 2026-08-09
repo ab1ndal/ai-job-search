@@ -131,7 +131,7 @@ applications/
 
 **`cover_letter.tex`** — The cover letter you actually submitted. Used to extract writing style patterns and structure for `06-cover-letter-templates.md`.
 
-**`cv_draft.tex`** — The CV variant you submitted. Used to extract profile statement styles for `05-cv-templates.md`.
+**`cv_draft.tex`** — The CV variant you submitted. Used to extract profile statement styles for `profiles/<name>/skills/profile-statements.md`.
 
 **`outcome.md`** — Fill this in after the application resolves. Format:
 

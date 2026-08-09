@@ -10,9 +10,10 @@ There are three paths into setup. Step 0 picks the right one; all three converge
 
 **Profile:** resolve the active candidate profile per `.claude/PROFILES.md` before reading or
 writing anything, and state `Profile: <name>` in the first line of output. `<name>` in the paths
-below is that resolved profile. `/setup` writes the five personalized skill files into
-`profiles/<name>/skills/` and the identity block into `profiles/<name>/PROFILE.md` — it never
-writes to the repo-root masters under `.claude/skills/`, and the root `CLAUDE.md` holds no
+below is that resolved profile. `/setup` writes the seven personalized skill files into
+`profiles/<name>/skills/`, the identity block into `profiles/<name>/PROFILE.md`, and the
+candidate's master CV into `profiles/<name>/cv/main.tex` — it never writes to the repo-root
+masters under `.claude/skills/` or to root `cv/main_example.tex`, and the root `CLAUDE.md` holds no
 candidate data.
 
 If `$ARGUMENTS` contains `--section <name>`, skip directly to that section in Path C for an update-only flow. Do not run the path-selection prompt below.
@@ -89,9 +90,9 @@ Read these in parallel before extracting anything. You must know what is already
 - `profiles/<name>/skills/02-behavioral-profile.md`
 - `profiles/<name>/skills/03-writing-style.md`
 - `profiles/<name>/skills/04-job-evaluation.md`
-- `.claude/skills/job-application-assistant/05-cv-templates.md`
+- `profiles/<name>/skills/profile-statements.md`
+- `profiles/<name>/skills/star-examples.md`
 - `.claude/skills/job-application-assistant/06-cover-letter-templates.md`
-- `.claude/skills/job-application-assistant/07-interview-prep.md`
 
 Hold this content in context throughout Path A. Do not re-read.
 
@@ -154,9 +155,9 @@ For each skill file, compare extracted document content against the current file
 - **`profiles/<name>/skills/02-behavioral-profile.md`:** Source is LinkedIn About + recommendation letters. Extract recurring themes, adjectives, phrases about how the candidate works. Add only to "Strongest Behavioral Traits", "How [Candidate] Works Best", or "Management Style Preferences" sections. Do not overwrite existing scored assessments. Always label inferred additions: *[Inferred from LinkedIn About / Reference letter - review before relying on this]*
 - **`profiles/<name>/skills/03-writing-style.md`:** Source is `cover_letter.tex` files. Extract recurring patterns. Add as observations under "## Patterns Observed in Past Applications". Do not modify existing rules. Only add if 2+ cover letters show a genuine pattern.
 - **`profiles/<name>/skills/04-job-evaluation.md`:** Source is `job_posting.md` + `outcome.md` pairs. If an application reached interview or offer: note role type and sector as a confirmed strong-fit signal. If 2+ applications repeat a no-response or rejection pattern: note it. Add findings under "## Calibration from Past Applications". Do not modify the existing scoring framework.
-- **`05-cv-templates.md`:** Source is `cv_draft.tex` files. Extract any profile statement that does not already appear in templates. Label with: *[Used for: <company>_<role>]*. **Ground before extracting:** archived drafts are tailored outputs, not source documents - verify every factual claim in an extracted statement (titles, employers, metrics, technologies) against `profiles/<name>/skills/01-candidate-profile.md` and drop or correct any claim the profile does not support, keeping only the framing. A tailored draft that drifted must never become a template future applications start from.
+- **`profile-statements.md`:** Source is `cv_draft.tex` files. Extract any profile statement that does not already appear in templates. Label with: *[Used for: <company>_<role>]*. **Ground before extracting:** archived drafts are tailored outputs, not source documents - verify every factual claim in an extracted statement (titles, employers, metrics, technologies) against `profiles/<name>/skills/01-candidate-profile.md` and drop or correct any claim the profile does not support, keeping only the framing. A tailored draft that drifted must never become a template future applications start from.
 - **`06-cover-letter-templates.md`:** Source is `cover_letter.tex` files. Extract opening patterns, bullet structures, closing formulations. Add only what is structurally distinct from existing templates.
-- **`07-interview-prep.md`:** Source is CV bullets, LinkedIn descriptions, reference letter quotes. Identify achievements not yet covered by an existing STAR example. Do NOT draft full STAR examples. Add stubs under "## STAR Candidates (Complete Manually)":
+- **`star-examples.md`:** Source is CV bullets, LinkedIn descriptions, reference letter quotes. Identify achievements not yet covered by an existing STAR example. Do NOT draft full STAR examples. Add stubs under "## STAR Candidates (Complete Manually)":
 
 ```markdown
 ### [Achievement title]
@@ -230,7 +231,7 @@ Documents cover skills, experience, education, references, and behavioral signal
 - Commute or location constraints (if not visible from CV)
 - Job search configuration (use the questions from Path C Section 9 below)
 
-Then proceed to Step 3 to populate the non-skill files (`profiles/<name>/PROFILE.md`, `cv/main_example.tex`, `profiles/<name>/skills/search-queries.md`). Step 3 will detect that the seven skill files are already populated and skip those substeps.
+Then proceed to Step 3 to populate the non-skill files (`profiles/<name>/PROFILE.md`, `profiles/<name>/cv/main.tex`, `profiles/<name>/skills/search-queries.md`). Step 3 will detect that the seven skill files are already populated and skip those substeps.
 
 ---
 
@@ -354,14 +355,14 @@ Replace skill match areas with the user's actual skills:
 
 Update career goals and motivation filters with their actual preferences.
 
-### 5. Update `05-cv-templates.md` *(Path B and C; skip if Path A populated it)*
+### 5. Update `profiles/<name>/skills/profile-statements.md` *(Path B and C; skip if Path A populated it)*
 Add role-specific profile statement templates based on their background.
 
-### 6. Update `07-interview-prep.md` *(Path B and C; skip if Path A populated it)*
+### 6. Update `profiles/<name>/skills/star-examples.md` *(Path B and C; skip if Path A populated it)*
 Create STAR examples from their actual experience (at least 3-4 examples). Path A leaves STAR stubs under "## STAR Candidates (Complete Manually)" rather than full examples; if any stubs are present, mention them in Step 4 so the user knows to flesh them out.
 
-### 7. Update `cv/main_example.tex`
-Replace placeholder personal data with their actual name, contact info, and add their education and most recent experience entries.
+### 7. Write `profiles/<name>/cv/main.tex`
+Copy the structure from root `cv/main_example.tex` (never modify that file) and replace placeholder personal data with the candidate's actual name, contact info, education, and most recent experience entries. This is their master CV - `/apply` grounds tailored CVs against it.
 
 ### 8. Generate `profiles/<name>/skills/search-queries.md`
 Replace all placeholder tokens in the search queries file with the user's actual information from Section 9 (or the equivalent follow-up questions in Path A's Step A7):
@@ -387,9 +388,9 @@ Present a summary:
 > - `profiles/<name>/skills/01-candidate-profile.md` - Structured profile
 > - `profiles/<name>/skills/02-behavioral-profile.md` - Behavioral assessment
 > - `profiles/<name>/skills/04-job-evaluation.md` - Personalized evaluation framework
-> - `.claude/skills/job-application-assistant/05-cv-templates.md` - CV templates with your profile statements
-> - `.claude/skills/job-application-assistant/07-interview-prep.md` - STAR examples from your experience
-> - `cv/main_example.tex` - Your LaTeX CV template
+> - `profiles/<name>/skills/profile-statements.md` - Your profile statement templates
+> - `profiles/<name>/skills/star-examples.md` - STAR examples from your experience
+> - `profiles/<name>/cv/main.tex` - Your master LaTeX CV
 > - `profiles/<name>/skills/search-queries.md` - Job search queries for `/scrape`
 >
 > **Privacy note:** the files above now contain your personal data and are *tracked by git*.
@@ -402,9 +403,9 @@ Present a summary:
 > - Run `/apply` with a job posting URL to see the full application workflow
 > - Run `/setup --section search` later to update your search queries as your priorities evolve
 
-If Path A left any STAR stubs in `07-interview-prep.md`, also note:
+If Path A left any STAR stubs in `star-examples.md`, also note:
 
-> Path A flagged [N] STAR candidate stubs in `07-interview-prep.md` that need your situation/task/action/result details before you use them in interviews.
+> Path A flagged [N] STAR candidate stubs in `profiles/<name>/skills/star-examples.md` that need your situation/task/action/result details before you use them in interviews.
 
 ---
 

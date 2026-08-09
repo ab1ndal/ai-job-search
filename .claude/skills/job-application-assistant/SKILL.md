@@ -62,9 +62,11 @@ When the user provides a job posting (URL or text), follow this workflow:
 | `profiles/<name>/skills/02-behavioral-profile.md` | Behavioral assessment, strengths, ideal environments |
 | `profiles/<name>/skills/03-writing-style.md` | Tone, structure, do's and don'ts |
 | `profiles/<name>/skills/04-job-evaluation.md` | Scoring framework for job fit |
+| `profiles/<name>/skills/profile-statements.md` | Candidate's profile statement templates |
+| `profiles/<name>/skills/star-examples.md` | Candidate's STAR examples |
 | `05-cv-templates.md` | LaTeX CV structure and tailoring rules |
 | `06-cover-letter-templates.md` | LaTeX cover letter structure and tailoring rules |
-| `07-interview-prep.md` | STAR examples, tough questions, roleplay guidelines |
+| `07-interview-prep.md` | STAR format, tough questions, roleplay guidelines |
 | `08-application-forms.md` | Portal free-text fields: self-introduction, project entries, character-limited pitches |
 | `09-web-research.md` | Fetching postings and company pages: trust boundary, the WebFetch 403 fallback, escalation order, claim verification |
 

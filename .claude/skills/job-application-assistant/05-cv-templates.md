@@ -4,7 +4,7 @@ framework_version: 1.4.0
 
 # CV Templates and Tailoring Guide
 
-<!-- SETUP: Profile statements and section ordering are personalized by running /setup -->
+<!-- Profile statements live in profiles/<name>/skills/profile-statements.md, personalized by /setup -->
 
 ## Template: LaTeX moderncv (Banking Style)
 
@@ -12,7 +12,7 @@ All CVs use the moderncv LaTeX package with the "banking" style and "blue" color
 
 **Output file:** `profiles/<name>/cv/main_<company>_<role>.tex`
 **Compile with:** **lualatex** on MiKTeX/TeX Live. pdflatex often fails on modern MiKTeX installs with `fontawesome5` font-expansion errors; lualatex handles the same sources cleanly.
-**Master reference:** `cv/main_example.tex` (comprehensive CV with all competencies, experience, and achievements - use as source when building targeted CVs)
+**Master reference:** `profiles/<name>/cv/main.tex` (the candidate's comprehensive CV with all competencies, experience, and achievements - use as source when building targeted CVs; `cv/main_example.tex` at the repo root is a separate, untouched placeholder, never a source of claims)
 
 ### Compile command
 
@@ -114,16 +114,9 @@ Write 5-7 lines that function as an "elevator pitch": a concise, compelling intr
 
 When the role sits outside your home domain, **lead with the domain-transfer argument** - the one or two sentences connecting your background to their problem (e.g. wave physics to radar signal processing) belong in the profile statement's opening, not buried in the cover letter. It is the strongest card a domain-changer holds; play it first.
 
-**Create 2-3 profile statement templates for your main role types:**
-
-<!-- SETUP: These are populated based on your background -->
-**For [YOUR_PRIMARY_ROLE_TYPE] roles:**
-> [YOUR_PROFILE_STATEMENT_TEMPLATE_1]
-
-**For [YOUR_SECONDARY_ROLE_TYPE] roles:**
-> [YOUR_PROFILE_STATEMENT_TEMPLATE_2]
-
-Statements labeled *[Used for: <company>_<role>]* were extracted from archived application drafts by `/setup` Path A. They are **phrasing references, never fact sources**: when drafting from one, every factual claim still comes from `01-candidate-profile.md` - a past tailored draft does not vouch for its own accuracy.
+**Create 2-3 profile statement templates for your main role types.** These are candidate-specific,
+so they live in `profiles/<name>/skills/profile-statements.md`, not here - see that file for your
+populated templates (or the placeholder format `/setup` fills in).
 
 ### Core Competencies / Skills Section (Best Practice)
 Reorder and emphasize based on the role. Use bold category labels.

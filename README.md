@@ -180,7 +180,7 @@ ai-job-search/
 │   │   │   ├── 04-job-evaluation.md   # Scoring framework for job fit
 │   │   │   ├── 05-cv-templates.md     # LaTeX CV structure + tailoring rules
 │   │   │   ├── 06-cover-letter-templates.md # LaTeX cover letter templates
-│   │   │   └── 07-interview-prep.md   # STAR examples + interview framework
+│   │   │   └── 07-interview-prep.md   # STAR format + interview framework
 │   │   ├── job-scraper/               # Job search orchestration
 │   │   └── upskill/                   # /upskill skill gap analysis and learning plan
 │   └── settings.json                  # Claude Code permissions (shared, scoped)
@@ -268,8 +268,9 @@ repo-wide instructions and the verification checklist — it carries no candidat
 | `profiles/<name>/skills/01-candidate-profile.md` | Structured version of your CV data |
 | `profiles/<name>/skills/02-behavioral-profile.md` | Your behavioral assessment or self-assessment |
 | `profiles/<name>/skills/04-job-evaluation.md` | Skill match areas, career goals, motivation filters |
-| `.claude/skills/job-application-assistant/05-cv-templates.md` | Profile statement templates for different role types (shared across profiles) |
-| `.claude/skills/job-application-assistant/07-interview-prep.md` | Your STAR examples from actual experience (shared across profiles) |
+| `profiles/<name>/skills/profile-statements.md` | Profile statement templates for different role types |
+| `profiles/<name>/skills/star-examples.md` | Your STAR examples from actual experience |
+| `profiles/<name>/cv/main.tex` | Your master LaTeX CV with actual details |
 | `profiles/<name>/skills/search-queries.md` | Job search queries for your skills and location |
 
 ### Updating your search queries

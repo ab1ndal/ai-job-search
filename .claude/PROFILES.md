@@ -35,12 +35,18 @@ All paths are relative to the repo root, with `<name>` replaced by the resolved 
 | Mailbox sync state | `profiles/<name>/gmail_sync/` |
 | Dashboard output | `profiles/<name>/reports/` |
 
-The five personalized skill files live in `profiles/<name>/skills/`:
+The seven personalized skill files live in `profiles/<name>/skills/`:
 `01-candidate-profile.md`, `02-behavioral-profile.md`, `03-writing-style.md`,
-`04-job-evaluation.md`, `search-queries.md`.
+`04-job-evaluation.md`, `search-queries.md`, `profile-statements.md`, `star-examples.md`.
 
 Read them from there, never from their repo-root copies. The root copies under
 `.claude/skills/` are untouched placeholder masters that `/profile new` copies from.
+`profile-statements.md` and `star-examples.md` have no repo-root copy — `05-cv-templates.md` and
+`07-interview-prep.md` hold only generic guidance and point to the per-profile file for content.
+
+The candidate's master CV lives at `profiles/<name>/cv/main.tex` (`/setup` writes it,
+`/apply` grounds against it). `cv/main_example.tex` at the repo root is a separate, untouched
+placeholder that never receives candidate data.
 
 ## Shared, never profile-scoped
 

@@ -215,9 +215,9 @@ All three paths produce the same result: fully populated profile files.
 | `profiles/<name>/skills/01-candidate-profile.md` | Structured education, experience, skills |
 | `profiles/<name>/skills/02-behavioral-profile.md` | Behavioral assessment |
 | `profiles/<name>/skills/04-job-evaluation.md` | Personalized skill match areas and career goals |
-| `.claude/skills/job-application-assistant/05-cv-templates.md` | Profile statement templates for your background (shared across profiles) |
-| `.claude/skills/job-application-assistant/07-interview-prep.md` | STAR examples from your experience (shared across profiles) |
-| `cv/main_example.tex` | Your LaTeX CV with actual details |
+| `profiles/<name>/skills/profile-statements.md` | Profile statement templates for your background |
+| `profiles/<name>/skills/star-examples.md` | STAR examples from your experience |
+| `profiles/<name>/cv/main.tex` | Your master LaTeX CV with actual details |
 | `profiles/<name>/skills/search-queries.md` | Job search queries for `/scrape` |
 
 `CLAUDE.md` holds only repo-wide instructions and the verification checklist — `/setup` never

@@ -69,6 +69,7 @@ You already have `01-candidate-profile.md` and `04-job-evaluation.md` in context
 
 Read only the reference files you do not yet have:
 - `profiles/<name>/skills/03-writing-style.md`
+- `profiles/<name>/skills/profile-statements.md`
 - `.claude/skills/job-application-assistant/05-cv-templates.md`
 - `.claude/skills/job-application-assistant/06-cover-letter-templates.md`
 
@@ -78,7 +79,7 @@ Also read the most recent existing CV and cover letter files for concrete struct
 - Read any existing `profiles/<name>/cv/main_*<CV_EXT>` file as a structural reference
 - Read any existing `profiles/<name>/cover_letters/cover_*<COVER_EXT>` or `profiles/<name>/cover_letters/Cover_*<COVER_EXT>` file as a structural reference
 
-*The master candidate profile (`profiles/<name>/skills/01-candidate-profile.md`), the master CV (`cv/main_example.tex`), and `profiles/<name>/PROFILE.md`'s Candidate Profile section are the sole source of truth for facts; existing tailored CVs may be read for structure and phrasing only, never as a source of claims.*
+*The master candidate profile (`profiles/<name>/skills/01-candidate-profile.md`), the master CV (`profiles/<name>/cv/main.tex`), and `profiles/<name>/PROFILE.md`'s Candidate Profile section are the sole source of truth for facts; existing tailored CVs may be read for structure and phrasing only, never as a source of claims.*
 
 ### Requirement coverage (both documents)
 - **Every requirement the posting states gets addressed - matched or honestly gapped, never silently omitted.** A stated requirement the candidate lacks (a tool, a clearance, years of experience) is acknowledged with an honest bridge ("not in my daily toolkit yet; a natural extension of X"), because omission reads as hiding once an interviewer asks. Build the requirement list from Step 1 and check both drafts against it before Step 3.
@@ -88,10 +89,10 @@ Also read the most recent existing CV and cover letter files for concrete struct
 ### CV (`profiles/<name>/cv/main_<company>_<role><CV_EXT>`)
 - In the **CV language from the profile** (the `CV language:` line in `profiles/<name>/PROFILE.md`'s Identity section). When the profile does not set one, default to **English**. Never switch language per posting - the CV language is a profile-level choice, so all CVs stay consistent and reusable
 - Follow the moderncv/banking format from `05-cv-templates.md`
-- Tailor the profile statement and experience bullets to the specific role
+- Tailor the profile statement (starting from the templates in `profiles/<name>/skills/profile-statements.md`) and experience bullets to the specific role
 - Reframe skills and achievements to match job requirements
 - Keep to 2 pages
-- **Grounding Audit:** Before writing to disk, audit all tailored bullet points against the union of three sources: `profiles/<name>/skills/01-candidate-profile.md` + the master CV (`cv/main_example.tex`) + `profiles/<name>/PROFILE.md`'s Candidate Profile section to verify that all dates, roles, and metrics match exactly (zero profile drift or fabrication).
+- **Grounding Audit:** Before writing to disk, audit all tailored bullet points against the union of three sources: `profiles/<name>/skills/01-candidate-profile.md` + the master CV (`profiles/<name>/cv/main.tex`) + `profiles/<name>/PROFILE.md`'s Candidate Profile section to verify that all dates, roles, and metrics match exactly (zero profile drift or fabrication).
 
 ### Cover Letter (`profiles/<name>/cover_letters/cover_<company>_<role><COVER_EXT>`)
 - **Match the language of the job posting** (Danish posting -> Danish cover letter, English posting -> English cover letter)
@@ -133,13 +134,13 @@ Read these reference files — and only these — to ground your critique:
 - `profiles/<name>/skills/02-behavioral-profile.md` — use this specifically to check whether the cover letter's voice matches the candidate's natural register. A "Collaborator" PI profile, for example, should not be given a combative, solo-hero tone; a "Persuader" profile should not be given over-hedged, apologetic phrasing.
 - `profiles/<name>/skills/03-writing-style.md`
 - `profiles/<name>/skills/04-job-evaluation.md`
-- The master CV baseline template (`cv/main_example.tex`)
+- The master CV baseline (`profiles/<name>/cv/main.tex`)
 - `profiles/<name>/PROFILE.md` (the identity block)
 
 Do NOT read `05-cv-templates.md` or `06-cover-letter-templates.md` — those govern template structure the drafter already applied and are not needed for content critique.
 
 ### 3. Factual Grounding Audit
-Compare every date, employer, job title, and quantitative metric in both drafts against the union of three sources: `profiles/<name>/skills/01-candidate-profile.md` + the master CV baseline template (`cv/main_example.tex`) + `profiles/<name>/PROFILE.md`'s Candidate Profile section. A claim is grounded if ANY of these sources supports it. Mismatches between these three sources themselves must be reported to the user as a profile-consistency warning rather than treated as draft drift. Draft mismatches must be flagged as Part A edits with `"reason": "grounding"` so they can be distinguished from style changes. Keep the tolerance honest: reframed emphasis is fine; changed facts and escalated numbers are not.
+Compare every date, employer, job title, and quantitative metric in both drafts against the union of three sources: `profiles/<name>/skills/01-candidate-profile.md` + the master CV baseline (`profiles/<name>/cv/main.tex`) + `profiles/<name>/PROFILE.md`'s Candidate Profile section. A claim is grounded if ANY of these sources supports it. Mismatches between these three sources themselves must be reported to the user as a profile-consistency warning rather than treated as draft drift. Draft mismatches must be flagged as Part A edits with `"reason": "grounding"` so they can be distinguished from style changes. Keep the tolerance honest: reframed emphasis is fine; changed facts and escalated numbers are not.
 
 ### 4. Drafts to Review
 Both drafts are provided inline below. Do NOT use the Read tool on the draft files — use these exact texts.
