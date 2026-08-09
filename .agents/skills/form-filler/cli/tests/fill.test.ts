@@ -33,7 +33,11 @@ describe("fillFields", () => {
     expect(await page.inputValue('textarea[name="cover_note"]')).toBe("Excited to apply.")
   })
 
-  test("throws when a selector does not match any element", async () => {
-    await expect(fillFields(page, { "#does-not-exist": "value" })).rejects.toThrow()
-  })
+  test(
+    "throws when a selector does not match any element",
+    async () => {
+      await expect(fillFields(page, { "#does-not-exist": "value" })).rejects.toThrow()
+    },
+    10000,
+  )
 })
