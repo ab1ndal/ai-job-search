@@ -18,11 +18,11 @@ skills, experience, languages) and
 inputs: strong/moderate/weak skill match areas, career goals,
 energizing/draining tasks, life-situation context). When `/setup` was run
 quickly, or the market shifts to ask about skills the candidate never
-recorded, these files can be incomplete — literal `[YOUR_...]` placeholders
-left unfilled, or a skill/domain that shows up repeatedly in postings but
-appears nowhere in the profile at all. Scoring proceeds anyway, silently
-treating missing signal as a low score, without ever asking the candidate to
-fill the gap.
+recorded, these files can be incomplete — literal bracketed placeholders
+left unfilled, or a skill/domain that shows up in a posting but appears
+nowhere in the profile at all. Scoring proceeds anyway, silently treating
+missing signal as a low score, without ever asking the candidate to fill
+the gap.
 
 This spec adds a shared "thin-spot" detector, used by both `/rank` (batch)
 and `/apply` (single job), that finds these gaps, asks the candidate targeted
@@ -32,11 +32,13 @@ questions, and writes the answers back into the profile before scoring runs.
 
 - Detect two categories of profile thinness relevant to the job(s) being
   scored:
-  1. Unfilled `[YOUR_...]` placeholders in `04-job-evaluation.md` dimensions
-     needed to score this batch/job.
-  2. Skills or domains that appear repeatedly in posting text but are absent
-     from both `01-candidate-profile.md` Technical Skills and
-     `04-job-evaluation.md`'s strong/moderate/weak match lists.
+  1. Unfilled bracketed placeholders in `04-job-evaluation.md` dimensions
+     needed to score this batch/job. Detected by both `/rank` and `/apply`.
+  2. Skills or domains that appear in posting text but are absent from both
+     `01-candidate-profile.md` Technical Skills and `04-job-evaluation.md`'s
+     strong/moderate/weak match lists. Detected by `/apply` only — see
+     Detection Logic §2 for why `/rank` can't do this at the point its scan
+     runs.
 - Ask the candidate about detected gaps before scoring, so scores reflect an
   accurate picture of their background rather than a stale or incomplete
   profile.
@@ -61,55 +63,71 @@ questions, and writes the answers back into the profile before scoring runs.
 - Does not touch jobs already in the tracker or already `ranked` (unless the
   user reruns with `--all`, which already re-scores under existing `/rank`
   rules).
+- Silent-skill gap detection does not run in `/rank`. `/rank`'s Step 1.5
+  happens before any posting text is fetched, so it can only detect
+  placeholder gaps; the silent-skill category is `/apply`-only. A future
+  enhancement could add a lightweight pre-fetch to `/rank` for this, but
+  that's a separate cost/benefit decision, not part of this feature.
 
 ## Detection Logic
 
 A "thin spot" is one of:
 
-1. **Placeholder gap.** A `[YOUR_...]` bracketed placeholder still present in
-   a `04-job-evaluation.md` dimension section that the current batch/job
-   actually needs to score (e.g. `[YOUR_CAREER_GOAL_1]` is only relevant if
-   Career Alignment is being scored, which it always is — all five
-   dimensions score every job, so any remaining placeholder in a scored
-   dimension counts).
+1. **Placeholder gap.** Any bracketed `[ALL_CAPS_WITH_UNDERSCORES]`
+   placeholder still present in a `04-job-evaluation.md` dimension section
+   that the current batch/job actually needs to score (e.g.
+   `[YOUR_CAREER_GOAL_1]` or `[SKILLS_YOU_LACK]` — all five dimensions score
+   every job, so any remaining placeholder in a scored dimension counts, not
+   only ones prefixed `YOUR_`).
 2. **Silent-skill gap.** A skill or domain term that:
-   - appears in the posting text of at least one job being processed, AND
+   - appears in the posting text of the job being processed, AND
    - does not appear (case-insensitive substring match is sufficient) in
      `01-candidate-profile.md` Technical Skills section, AND
    - does not appear in any of `04-job-evaluation.md`'s strong/moderate/weak
      match-area lists.
 
-   For `/rank` (batch), only surface a silent-skill gap if it recurs across
-   the batch (appears in more than one candidate posting) — a single
-   one-off mention is noise, not a pattern worth interrupting the user for.
-   For `/apply` (single job), any silent-skill gap in that one posting
-   qualifies — there's no batch to average against.
+   **This category requires posting text already in context, which only
+   `/apply` has at the point its thin-spot scan runs** (the posting is
+   fetched in `/apply`'s Step 0, before Step 1's scan). `/rank`'s Step 1.5
+   runs *before* `/scrape`'s stored job data is ever expanded into full
+   posting text — `seen_jobs.json` stores only title/company/url/fit-bucket,
+   not posting body — so silent-skill detection is **`/apply`-only**.
+   `/rank` detects placeholder gaps only. A batch-level silent-skill check
+   would require fetching every candidate posting's text before scoring,
+   which duplicates Step 2's fetch at extra cost for no scoring benefit;
+   out of scope for this feature. (See Non-Goals.)
 
 3. **Known-gaps exclusion.** Before surfacing anything, check the `## Known
    Gaps` table in `01-candidate-profile.md` (see below). A gap already
-   listed there (any status) is never re-surfaced, regardless of category.
-   This check is a live re-scan, not a cache: if the gap's subject (e.g.
-   "Kubernetes") has since appeared in the Technical Skills or match-area
-   lists (because `/expand` or `/setup` added it), the gap is no longer
-   silent by definition (category 2's second condition no longer holds), so
-   it naturally stops being detected — no explicit "resolved" state is
-   needed for silent-skill gaps.
+   listed there (any status), matched **case-insensitively**, is never
+   re-surfaced, regardless of category. This check is a live re-scan, not a
+   cache: if the gap's subject (e.g. "Kubernetes") has since appeared in the
+   Technical Skills or match-area lists (because `/expand` or `/setup` added
+   it), the gap is no longer silent by definition (category 2's second
+   condition no longer holds), so it naturally stops being detected — no
+   explicit "resolved" state is needed for silent-skill gaps.
 
    Placeholder gaps resolve the same way: once the placeholder is replaced
-   with real text, it no longer matches the `[YOUR_...]` pattern and stops
-   being detected.
+   with real text, it no longer matches the `[ALL_CAPS_WITH_UNDERSCORES]`
+   pattern and stops being detected. The `Gap` value recorded for a
+   placeholder gap must be the **literal placeholder token** (e.g.
+   `[YOUR_CAREER_GOAL_1]`), never a paraphrase — two different runs
+   paraphrasing the same placeholder as "Career goal" vs. "Career goals"
+   would defeat the exclusion check on the next run.
 
 ## Q&A Flow
 
 ### `/rank` — new Step 1.5 (between "Load State" and "Batch-Fetch and Score")
 
-1. After loading candidate jobs and the profile (existing Step 1), scan the
-   stored posting text/fit-notes for every candidate job for thin spots,
-   using the detection logic above.
-2. Filter out anything listed in `## Known Gaps`.
-3. Rank remaining thin spots by `(number of jobs in this batch affected) ×
-   (dimension weight from 04-job-evaluation.md, or 1 for silent-skill gaps
-   which aren't tied to a single weighted dimension)`. Cap at 5.
+1. After loading candidate jobs and the profile (existing Step 1), scan
+   `04-job-evaluation.md` for **placeholder gaps only** (no posting text is
+   available yet at this point — see Detection Logic §2).
+2. Filter out anything listed in `## Known Gaps` (case-insensitive).
+3. Rank remaining placeholder gaps by dimension weight from
+   `04-job-evaluation.md`'s Weighting section (unweighted dimensions, i.e.
+   Location, use weight 1). Cap at 5 — in practice the template has at most
+   ~11 placeholders total across all dimensions, so this cap is rarely
+   binding.
 4. If the list is non-empty, ask all of them in a single `AskUserQuestion`
    round (up to 5 questions). If empty, skip straight to Step 2 — no
    interruption when the profile is already sufficient.
@@ -118,15 +136,17 @@ A "thin spot" is one of:
    profile content.
 
 If more than 5 thin spots exist, the remaining ones are simply not asked
-this run (they'll surface again on a future `/rank` run with a fresh batch,
-still subject to the same cap and the recurrence rule for silent-skill
-gaps).
+this run (they'll surface again on a future `/rank` run, still subject to
+the same cap).
 
 ### `/apply` — new sub-step inside existing Step 1, before scoring
 
-1. After fetching the single posting, scan it alone for thin spots against
-   the current profile.
-2. Filter out `## Known Gaps` entries.
+1. After fetching the single posting (existing Step 0), scan it for **both**
+   placeholder gaps and silent-skill gaps against the current profile — this
+   is the only place silent-skill detection runs, since it is the only
+   point in either workflow where posting text is already in context before
+   scoring (see Detection Logic §2).
+2. Filter out `## Known Gaps` entries (case-insensitive).
 3. If any remain, ask all of them in one `AskUserQuestion` round (no cap
    needed — a single posting naturally produces few).
 4. Apply answers per the write rules below.
@@ -134,18 +154,30 @@ gaps).
 
 ## Profile Write Rules
 
-- **Placeholder answers** → replace the literal `[YOUR_...]` placeholder
-  text in `04-job-evaluation.md` with the candidate's answer, verbatim, in
-  the same location/format the template already uses (e.g. a career-goal
-  bullet stays a bullet).
-- **Silent-skill answers** → the question always distinguishes "I have this
-  skill" from "genuine gap, I don't." For "I have this skill, here's my
-  level": add to `01-candidate-profile.md` Technical Skills (with whatever
-  proficiency framing the candidate gives) and add the skill to the
-  matching strong/moderate/weak list in `04-job-evaluation.md` based on how
-  they characterized their proficiency. For "genuine gap" or "I don't know":
-  do not add to Technical Skills or match lists — add a row to `## Known
-  Gaps` instead (see below), so scoring counts it honestly as a weakness.
+All file paths below are `profiles/<name>/skills/01-candidate-profile.md`
+and `profiles/<name>/skills/04-job-evaluation.md` — the resolved candidate's
+copies, never the template copies in
+`.claude/skills/job-application-assistant/`, which are read-only references
+this feature must never write to.
+
+- **Placeholder answers** → replace the literal placeholder token in
+  `04-job-evaluation.md` with the candidate's answer, verbatim, in the same
+  location/format the template already uses (e.g. a career-goal bullet
+  stays a bullet). If the candidate has no answer ("I don't know" /
+  declines to say), leave the placeholder in place and add a `## Known
+  Gaps` row using the literal placeholder token as `Gap` and Status
+  `unknown` (placeholder gaps only ever use `unknown` — "declined" doesn't
+  apply to a fact the candidate doesn't have, only to a skill they've
+  confirmed they lack; see Known Gaps Table below).
+- **Silent-skill answers** → the `AskUserQuestion` options must be exactly:
+  **Strong** (primary skill), **Working** (secondary/moderate skill),
+  **None — genuine gap**, **Not sure**. "Strong" or "Working" → add to
+  `01-candidate-profile.md` Technical Skills (proficiency per the option
+  chosen) and add the skill to the matching strong/moderate match-area list
+  in `04-job-evaluation.md`. "None — genuine gap" → add a `## Known Gaps`
+  row with Status `declined`. "Not sure" → add a `## Known Gaps` row with
+  Status `unknown`. Neither of the last two touches Technical Skills or the
+  match-area lists, so scoring counts the gap honestly as a weakness.
 - Writes happen immediately after the Q&A round, before scoring proceeds,
   so the same run's scoring reflects the update.
 
@@ -165,12 +197,17 @@ Entries here are never re-surfaced as questions. Removed automatically by
 | Kubernetes | 2026-08-09 | declined |
 ```
 
-- `Gap`: the skill/domain term or placeholder identifier.
+- `Gap`: the skill/domain term (silent-skill gap), or the literal placeholder
+  token verbatim, e.g. `[YOUR_CAREER_GOAL_1]` (placeholder gap — never a
+  paraphrase, since the exclusion check matches on this text).
 - `Asked`: date first surfaced (YYYY-MM-DD).
-- `Status`: `declined` (candidate confirmed it's a genuine gap) or `unknown`
-  (candidate didn't have an answer). Both are treated identically by the
-  exclusion check — the distinction is informational only, for the
-  candidate reading their own profile later.
+- `Status`: `declined` (candidate confirmed a skill is a genuine gap —
+  silent-skill gaps only) or `unknown` (candidate had no answer — the only
+  status a placeholder gap ever gets, since "declined" describes confirming
+  the absence of a skill, which doesn't apply to a fact like a career goal).
+  Both are treated identically by the exclusion check (case-insensitive) —
+  the distinction is informational only, for the candidate reading their
+  own profile later.
 
 `/expand` and `/setup`: when either command adds a skill to Technical
 Skills, it must also delete any `## Known Gaps` row whose `Gap` matches that
@@ -198,15 +235,17 @@ the candidate has genuinely upskilled.
 
 - Unit-level (manual verification, since these are markdown-driven prompt
   workflows, not executable code): construct a test profile with a known
-  placeholder left unfilled and a posting mentioning a skill absent from the
-  profile; run `/rank` and confirm exactly the expected questions are
-  asked, in the expected priority order when more than 5 candidates exist.
-- Confirm a `Known Gaps` entry suppresses re-asking on a second `/rank` run
-  over a fresh batch that still mentions the same skill.
+  placeholder left unfilled; run `/rank` and confirm exactly the expected
+  placeholder questions are asked, in dimension-weight priority order when
+  more than 5 candidates exist.
+- Confirm a `Known Gaps` entry (matched case-insensitively) suppresses
+  re-asking the same placeholder on a second `/rank` run.
 - Confirm adding the declined skill via `/expand` removes the `Known Gaps`
   row and the skill no longer triggers detection.
-- Confirm `/apply` on a single job surfaces silent-skill gaps without the
-  "recurs across batch" requirement that `/rank` applies.
+- Confirm `/apply` on a single job surfaces both placeholder gaps and
+  silent-skill gaps (the only workflow that detects the latter), and that a
+  silent-skill answer of "Strong"/"Working" writes to Technical Skills while
+  "None — genuine gap"/"Not sure" writes to Known Gaps instead.
 
 ## Files Touched
 
