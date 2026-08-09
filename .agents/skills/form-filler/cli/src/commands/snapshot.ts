@@ -1,8 +1,8 @@
 import { join } from "path"
 import { tmpdir } from "os"
-import { launchSession, connectSession, readSession } from "../session.js"
-import { extractSnapshot } from "../snapshot-extract.js"
-import { writeError } from "../helpers.js"
+import { launchSession, connectSession, readSession, clearSession } from "../session.ts"
+import { extractSnapshot } from "../snapshot-extract.ts"
+import { writeError } from "../helpers.ts"
 
 export interface SnapshotOpts {
   url?: string
@@ -19,8 +19,17 @@ export async function runSnapshot(opts: SnapshotOpts): Promise<number> {
       }
       ;({ page } = await launchSession(opts.url))
     } else {
-      ;({ page } = await connectSession())
-      if (opts.url) await page.goto(opts.url, { waitUntil: "domcontentloaded" })
+      try {
+        ;({ page } = await connectSession())
+        if (opts.url) await page.goto(opts.url, { waitUntil: "domcontentloaded" })
+      } catch (e) {
+        // A crashed or Ctrl-C'd run leaves a session file pointing at a dead
+        // browser. With a URL in hand the candidate is starting over anyway, so
+        // discard the stale session and launch fresh rather than dead-ending.
+        if (!opts.url) throw e
+        await clearSession()
+        ;({ page } = await launchSession(opts.url))
+      }
     }
     const screenshotPath = join(tmpdir(), `form-filler-${Date.now()}.png`)
     const result = await extractSnapshot(page, screenshotPath)
