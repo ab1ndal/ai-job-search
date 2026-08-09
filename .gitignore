@@ -97,10 +97,10 @@ upskill/*.md
 .agents/**/node_modules/
 .agents/**/*.log
 .agents/usage/
+.agents/skills/form-filler/cli/.session/
 
 # Brainstorm mockups (superpowers visual companion) - never ship
 .superpowers/
-docs/
 
 # Per-candidate profile data (tracker, generated documents, archive, scraper state).
 # The root-relative rules above do not match these paths.

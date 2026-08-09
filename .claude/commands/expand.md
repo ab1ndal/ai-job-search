@@ -174,6 +174,7 @@ Apply only the confirmed items. Use the Edit tool to add to the relevant section
 
 ### Additions to `profiles/<name>/skills/01-candidate-profile.md`
 - Technical skills (primary and secondary) → append to the Technical Skills section
+- After appending any Technical Skills entry, check the profile's `## Known Gaps` table (see `.claude/skills/job-application-assistant/10-thin-spot-detection.md`'s Pruning Rule): delete any row whose `Gap` matches the newly added skill (case-insensitive).
 - Domain knowledge → append to the Domain Knowledge or Technical Skills section (match the existing structure)
 - Methods and practices → append appropriately
 
