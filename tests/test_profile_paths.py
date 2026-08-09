@@ -46,6 +46,14 @@ CONVERTED_FILES: list[str] = [
     ".claude/commands/gmail-sync.md",
     ".claude/commands/html-report.md",
     ".claude/commands/notion-sync.md",
+    ".claude/commands/expand.md",
+    ".claude/commands/reset.md",
+    ".claude/commands/setup.md",
+    ".claude/commands/add-template.md",
+    ".claude/skills/job-application-assistant/SKILL.md",
+    ".claude/skills/job-application-assistant/05-cv-templates.md",
+    ".claude/skills/job-application-assistant/06-cover-letter-templates.md",
+    ".claude/skills/job-application-assistant/08-application-forms.md",
 ]
 
 

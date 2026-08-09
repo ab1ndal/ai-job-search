@@ -31,6 +31,9 @@ All paths are relative to the repo root, with `<name>` replaced by the resolved 
 | Interview material | `profiles/<name>/documents/interview/` |
 | Scraper state | `profiles/<name>/job_scraper/` (`seen_jobs.json`, `notion_sync.json`, scrape reports) |
 | Identity block | `profiles/<name>/PROFILE.md` |
+| Upskill learning reports | `profiles/<name>/upskill/` |
+| Mailbox sync state | `profiles/<name>/gmail_sync/` |
+| Dashboard output | `profiles/<name>/reports/` |
 
 The five personalized skill files live in `profiles/<name>/skills/`:
 `01-candidate-profile.md`, `02-behavioral-profile.md`, `03-writing-style.md`,
