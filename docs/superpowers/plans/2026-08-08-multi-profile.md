@@ -13,7 +13,8 @@
 ## Global Constraints
 
 - Profile names in scope: `abhinav`, `anushka`. Directory name == profile name, lowercase.
-- Profile root is `profiles/<name>/`. Derived paths, exact spellings: `profiles/<name>/tracker.csv`, `profiles/<name>/skills/`, `profiles/<name>/cv/`, `profiles/<name>/cover_letters/`, `profiles/<name>/documents/<sub>/`, `profiles/<name>/job_scraper/`.
+- Profile root is `profiles/<name>/`. Derived paths, exact spellings: `profiles/<name>/tracker.csv`, `profiles/<name>/skills/`, `profiles/<name>/cv/`, `profiles/<name>/cover_letters/`, `profiles/<name>/documents/<sub>/`, `profiles/<name>/job_scraper/`, `profiles/<name>/upskill/`, `profiles/<name>/gmail_sync/`, `profiles/<name>/reports/`.
+- Scope addition found during Task 5 (not in the original inventory): `upskill/report-*.md`, `gmail_sync/state.json`, and `reports/application-dashboard.html` are per-candidate outputs and must be profile-scoped too. `upskill/` belongs to Task 5, `gmail_sync/` and `reports/` to Task 7, and all three join the audit patterns.
 - Per-profile skill files, exactly five: `01-candidate-profile.md`, `02-behavioral-profile.md`, `03-writing-style.md`, `04-job-evaluation.md`, `search-queries.md`.
 - Shared and staying at the repo root, never profile-scoped: `cv/main_example.tex`, `cover_letters/cover_example.tex`, `cover_letters/cover.cls`, `cover_letters/OpenFonts/**`, `templates/`, `documents/README.md`, and the repo-root copies of the five per-profile skill files (they remain placeholder masters that `/profile new` copies from; nothing reads them at runtime).
 - Tracker status vocabulary has one definition, in `.claude/commands/outcome.md` ("Tracker status vocabulary"). Never restate it; defer to it. Canonical: `drafted | applied | interview | offer | hired | rejected | no_response | offer_declined | withdrawn`; legacy space spellings `no response` / `offer declined` accepted on read only.
