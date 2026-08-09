@@ -246,6 +246,38 @@ class ProfileIgnoreRules(unittest.TestCase):
         self.assertIn("profiles/", rules)
         self.assertIn(".active-profile", rules)
 
+    def _assert_check_ignore(self, path: str, expect_ignored: bool) -> None:
+        # git check-ignore -q: exit 0 = ignored, 1 = not ignored, 2 = error.
+        # Paths need not exist on disk - check-ignore matches patterns, not files.
+        result = subprocess.run(
+            ["git", "check-ignore", "-q", path],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 2:
+            self.fail(f"git check-ignore errored on {path!r}: {result.stderr}")
+        actual_ignored = result.returncode == 0
+        self.assertEqual(
+            actual_ignored,
+            expect_ignored,
+            f"expected git check-ignore ignored={expect_ignored} for {path!r}, "
+            f"got ignored={actual_ignored} (exit {result.returncode})",
+        )
+
+    def test_git_actually_ignores_nested_profile_paths(self):
+        self._assert_check_ignore(
+            "profiles/abhinav/documents/applications/acme_swe/cover_letter.pdf",
+            expect_ignored=True,
+        )
+        self._assert_check_ignore("profiles/abhinav/tracker.csv", expect_ignored=True)
+        self._assert_check_ignore(".active-profile", expect_ignored=True)
+
+    def test_git_does_not_ignore_tracked_shared_template(self):
+        # Control path: a tracked shared template must not be swept up by the
+        # new rules, or the assertions above could pass for the wrong reason.
+        self._assert_check_ignore("cv/main_example.tex", expect_ignored=False)
+
 
 if __name__ == "__main__":
     unittest.main()
