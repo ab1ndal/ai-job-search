@@ -21,6 +21,7 @@ FORBIDDEN = [
     re.compile(r"(?<!/)job_scraper/"),
     re.compile(r"(?<!/)cv/main_(?!example)"),
     re.compile(r"(?<!/)cover_letters/[cC]over_(?!example)"),
+    re.compile(r"(?<!/)upskill/report"),
 ]
 
 # Shared assets that legitimately keep their root paths everywhere.

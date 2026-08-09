@@ -43,7 +43,7 @@ In targeted mode, derive a slug from the job title and company for the report fi
 2. For each row, note the `role`, `company`, and `fit_rating`. The `fit_rating` column is a 0–100 score where 100 = perfect fit. You will use it to weight gaps — a lower fit rating means the role exposed more gaps.
 3. Read `profiles/<name>/job_scraper/seen_jobs.json`. Keep entries with `"status": "ranked"` and `rank_score >= 45` — the Moderate Fit floor from `04-job-evaluation.md` (below that, a job is Weak/Poor Fit and would otherwise dominate the heatmap with jobs the user shouldn't chase). For each kept entry, note its `title`, `company`, `rank_score`, and — when present — its recorded `gaps`. An entry with no `gaps` field (ranked before gap persistence existed) is skipped, counted, and reported once in the terminal: *"N ranked jobs were scored before gap persistence and contribute nothing; `/rank --all` re-scores them."* Never back-fill a missing `gaps` field by guessing from the title.
 4. Read `.claude/skills/job-application-assistant/01-candidate-profile.md` to get the candidate's current skills and experience.
-5. Check `upskill/` for the most recent aggregate report file (`report-YYYY-MM-DD.md`) — if one exists, note its date and load it for the diff in Step 8.
+5. Check `profiles/<name>/upskill/` for the most recent aggregate report file (`report-YYYY-MM-DD.md`) — if one exists, note its date and load it for the diff in Step 8.
 
 ### Targeted mode
 1. Use WebFetch to retrieve the job posting from the URL.
@@ -227,10 +227,10 @@ Study direction: ...
 
 ### Save the report
 
-- **Aggregate:** `upskill/report-YYYY-MM-DD.md`
-- **Targeted:** `upskill/report-YYYY-MM-DD-<company-slug>-<role-slug>.md`
+- **Aggregate:** `profiles/<name>/upskill/report-YYYY-MM-DD.md`
+- **Targeted:** `profiles/<name>/upskill/report-YYYY-MM-DD-<company-slug>-<role-slug>.md`
   - Slugify: lowercase, spaces → hyphens, strip special characters
-  - Example: `upskill/report-2026-04-20-guardsix-senior-ai-engineer.md`
+  - Example: `profiles/<name>/upskill/report-2026-04-20-guardsix-senior-ai-engineer.md`
 
 Use the Write tool to save the file.
 
@@ -245,7 +245,7 @@ If no previous report exists, omit the "Since Last Report" section entirely.
 ### Confirm to user
 
 After saving, print:
-> "Report saved to `upskill/<filename>.md`. Review it anytime to track your learning progress."
+> "Report saved to `profiles/<name>/upskill/<filename>.md`. Review it anytime to track your learning progress."
 
 ## Important Rules
 
