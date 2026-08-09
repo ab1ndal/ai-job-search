@@ -42,13 +42,21 @@ Read the evaluation framework:
 
 Read `.claude/skills/job-application-assistant/10-thin-spot-detection.md`.
 Using its Detection Rules, scan this posting's text for thin spots against
-the profile files just read. Apply the Known Gaps exclusion (no batch cap
-needed — this is a single posting).
+the profile files just read — this is the only place in either workflow
+where posting text is already in context before scoring, so this scan
+covers **both** placeholder gaps and silent-skill gaps (`/rank`'s Step 1.5
+only ever sees placeholder gaps; silent-skill detection is `/apply`-only —
+see that doc's Detection Rules §2). Apply the Known Gaps exclusion
+(case-insensitive; no batch cap needed — this is a single posting).
 
-If any thin spots remain, ask them all in a single `AskUserQuestion` round,
-then apply the Profile Write Rules to update `01-candidate-profile.md`
-and/or `04-job-evaluation.md` before evaluating. If none remain, continue
-straight to the evaluation below.
+If any thin spots remain, ask them all in a single `AskUserQuestion` round —
+for a silent-skill gap, the options are exactly **Strong**, **Working**,
+**None — genuine gap**, **Not sure** (see the referenced doc's Q&A
+Construction and Profile Write Rules sections for the full mapping) — then
+apply the Profile Write Rules to update
+`profiles/<name>/skills/01-candidate-profile.md` and/or
+`profiles/<name>/skills/04-job-evaluation.md` before evaluating. If none
+remain, continue straight to the evaluation below.
 
 Using the framework from `04-job-evaluation.md`, evaluate the job posting against the candidate's profile. If the salary lookup tool is configured, run:
 

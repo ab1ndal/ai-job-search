@@ -41,14 +41,18 @@ State how many jobs will be ranked before proceeding.
 
 Read `.claude/skills/job-application-assistant/10-thin-spot-detection.md` once (not per job).
 
-Using its Detection Rules, scan the candidate jobs selected in Step 1 (their
-stored posting text / fit-notes in `seen_jobs.json`) for thin spots against
-the profile files already read in Step 1. Apply the Known Gaps exclusion,
-then the batch cap-of-5 ranking rule from Q&A Construction.
+No posting text is fetched yet at this point in the workflow, so this step
+scans only for **placeholder gaps** in `04-job-evaluation.md` (Detection
+Rules §1) — silent-skill detection needs posting text and only runs in
+`/apply` (see that doc's Detection Rules §2). Apply the Known Gaps exclusion
+(case-insensitive), then cap remaining placeholder gaps at 5 by dimension
+weight from `04-job-evaluation.md`'s Weighting section, per its Q&A
+Construction section's `/rank` flow.
 
 If any thin spots remain, ask them all in a single `AskUserQuestion` round,
-then apply the Profile Write Rules to update `01-candidate-profile.md`
-and/or `04-job-evaluation.md` accordingly before continuing.
+then apply the Profile Write Rules to update
+`profiles/<name>/skills/01-candidate-profile.md` and/or
+`profiles/<name>/skills/04-job-evaluation.md` accordingly before continuing.
 
 If no thin spots remain after the Known Gaps exclusion, say nothing and
 continue straight to Step 2.
