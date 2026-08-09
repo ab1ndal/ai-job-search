@@ -79,15 +79,22 @@ bun run .agents/skills/form-filler/cli/src/cli.ts upload "<selector>" "<file-pat
 
 ## Step 4: Advance or Stop at Submit
 
-Look at the page's `buttons` list from the snapshot.
+Look at the page's `buttons` list from the snapshot. `snapshot-extract.ts` has no `isLastPage` or page-count field — finality is never inferred from a button's label or from a subjective read of "does this look like the last page." This step is fail-closed: auto-advance requires an affirmative, checkable signal that more pages follow; anything less routes to the Submit Gate.
 
-**If a button's text matches Next/Continue/Proceed (case-insensitive) and this does not look like the form's final page:**
+**Step 4a — Look for a not-final signal.** Before considering any click, check for one of these two concrete, checkable signals:
+- A step/progress indicator is visible in the snapshot (e.g. "Step 1 of 3", a numbered progress bar) **and** it shows the current step is before the last one.
+- The candidate has explicitly told you this posting's form has more pages ahead of the current one (e.g. confirmed earlier in this session, or stated in the tracked posting notes).
+
+If **neither** signal is present, skip straight to Step 4c — do not evaluate button text at all.
+
+**Step 4b — Auto-advance (only if a not-final signal was found in 4a):**
+If a not-final signal is present AND a button's text matches Next/Continue/Proceed (case-insensitive):
 ```bash
 bun run .agents/skills/form-filler/cli/src/cli.ts click "<selector>"
 ```
 Then run `snapshot` again (no URL argument) to read the new page, and return to Step 2.
 
-**If the only remaining action is a button whose text matches Submit/Apply/Send Application (case-insensitive), or this is the last page in a portal that showed a step indicator ("Step 3 of 3", etc.):** this is the Submit Gate. Do not click it as part of this step. Continue to Step 5.
+**Step 4c — Default to the Submit Gate.** In every other case — a button matching Submit/Apply/Send Application, a step indicator showing the last step, **or no not-final signal found in 4a regardless of what the button is labeled (including "Continue" or "Next")** — treat this as the Submit Gate. Do not click anything as part of this step. Continue to Step 5.
 
 ---
 
