@@ -37,6 +37,24 @@ State how many jobs will be ranked before proceeding.
 
 ---
 
+## Step 1.5: Thin-Spot Q&A
+
+Read `.claude/skills/job-application-assistant/10-thin-spot-detection.md` once (not per job).
+
+Using its Detection Rules, scan the candidate jobs selected in Step 1 (their
+stored posting text / fit-notes in `seen_jobs.json`) for thin spots against
+the profile files already read in Step 1. Apply the Known Gaps exclusion,
+then the batch cap-of-5 ranking rule from Q&A Construction.
+
+If any thin spots remain, ask them all in a single `AskUserQuestion` round,
+then apply the Profile Write Rules to update `01-candidate-profile.md`
+and/or `04-job-evaluation.md` accordingly before continuing.
+
+If no thin spots remain after the Known Gaps exclusion, say nothing and
+continue straight to Step 2.
+
+---
+
 ## Step 2: Batch-Fetch and Score
 
 Dispatch parallel `general-purpose` agents via the **Agent tool**, ~5 jobs per agent (a single agent is fine for ≤5 jobs). Token-efficiency rules, consistent with `/apply`:
