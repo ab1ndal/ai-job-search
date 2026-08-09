@@ -100,7 +100,6 @@ upskill/*.md
 
 # Brainstorm mockups (superpowers visual companion) - never ship
 .superpowers/
-docs/
 
 # Per-candidate profile data (tracker, generated documents, archive, scraper state).
 # The root-relative rules above do not match these paths.
