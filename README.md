@@ -12,7 +12,7 @@
 
 [![CI](https://github.com/MadsLorentzen/ai-job-search/actions/workflows/ci.yml/badge.svg)](https://github.com/MadsLorentzen/ai-job-search/actions/workflows/ci.yml)
 
-An AI-powered job application framework built on [Claude Code](https://claude.com/claude-code). Fork it, fill in your profile, and let Claude evaluate job postings, tailor your CV, write cover letters, and prepare you for interviews.
+An AI-powered job application framework built on [Claude Code](https://claude.com/claude-code). Fill in your profile and let Claude evaluate job postings, tailor your CV, write cover letters, and prepare you for interviews.
 
 > Note: This is an independent open-source project and is not affiliated with, endorsed by, sponsored by, or maintained by Anthropic. Anthropic and Claude Code are referenced only to describe the toolchain this workflow uses.
 >
@@ -71,14 +71,7 @@ The framework encodes career guidance best practices, including structured evalu
 
 > 🎥 **Prefer to see it in action first?** [The Next New Thing did a hands-on walkthrough](https://www.youtube.com/watch?v=HoVxjMNFYv4) of how the workflow is actually used, from setup to a finished application (recorded August 2026 - commands may have evolved since).
 
-### 1. Fork and clone
-
-```bash
-gh repo fork MadsLorentzen/ai-job-search --clone
-cd ai-job-search
-```
-
-### 2. Install job search tools
+### 1. Install job search tools
 
 PowerShell:
 
@@ -101,7 +94,7 @@ done
 
 For `linkedin-search` and `freehire-search` the install is optional: both have zero runtime dependencies and run with plain `bun`; `bun install` only pulls TypeScript dev types.
 
-### 3. Set up your profile
+### 2. Set up your profile
 
 ```bash
 claude
@@ -111,7 +104,7 @@ claude
 
 `/setup` offers three paths: read your `documents/` folder if you have one populated (CV PDF, LinkedIn export, diplomas, reference letters, past applications), import a single CV pasted in chat, or walk through an interview. It auto-detects what you have and asks. Documents-folder mode is idempotent and safe to re-run as you add more material; see `documents/README.md` for the layout.
 
-### 4. Search for jobs
+### 3. Search for jobs
 
 ```bash
 /scrape
@@ -119,7 +112,7 @@ claude
 
 This searches multiple job portals for positions matching your profile, deduplicates results, and presents them sorted by fit. Pick a match to run `/apply` on it directly — or, when a scrape returns more jobs than you want to eyeball, run `/rank` to batch-score them all against the fit framework and get a ranked shortlist first.
 
-### 5. Apply to a job
+### 4. Apply to a job
 
 ```bash
 /apply https://jobindex.dk/job/1234567
@@ -149,6 +142,11 @@ Postings are treated as untrusted input (the workflow follows no instructions em
 - **`/html-report`** generates a self-contained HTML dashboard from `profiles/<name>/tracker.csv` and the application archives — stat cards, status/sector/channel/funnel charts (inline SVG, no external dependencies), and a filterable applications table. Opens directly in a browser, fully offline. Re-run it any time after `/apply` or `/outcome` adds new entries.
 - **`/add-template`** registers your own CV or cover letter template (LaTeX, Typst, or another toolchain) in place of the stock ones. It captures the template's instructions (source extension, compile command, fonts, style rules, page limit), runs a mandatory test compile, and wires the template into `/apply`. See [Custom templates](#custom-templates) below.
 - **`/add-portal`** generates a job-portal search skill for a job board in your market. It investigates the portal (search URL pattern, result structure, access rules), scaffolds the CLI skill from the same structure as the shipped ones, and test-runs a live query before registering. See [Job search tools](#job-search-tools) below.
+- **`/compare`** builds a side-by-side comparison of 2+ jobs you're weighing against each other - salary, remote policy, PTO, equity, other perks, and stated requirements, pulled fresh from each posting. Reference jobs by company/role name, a `/rank` shortlist number, or a posting URL directly. Read-only: it never recomputes fit scores (only shows ones `/rank` or `/apply` already produced) and writes nothing to any file.
+- **`/strengthen-profile`** audits your LinkedIn profile and master CV for structural completeness and presentation quality, independent of any specific posting or market trend. Complements `/upskill` (market-demand gaps) and `/expand` (competency enrichment) without duplicating either.
+- **`/explore-roles`** looks outward from your actual skills and experience to surface role titles and industries you never thought to search for - market-grounded suggestions beyond the fixed categories in `search-queries.md`. Lightweight only: it never touches `search-queries.md`, the tracker, or scraper state - you decide what enters the active search pipeline.
+- **`/outreach`** tracks who you already know at target companies (imported from your LinkedIn connections export), finds hiring managers you don't know via public web search, and drafts outreach messages - never sends anything. Distinct from `/outcome followup`, which chases a submitted application gone quiet; `/outreach` is the step before or independent of an application existing.
+- **`/fill-form`** drives a browser through an online application form page by page, with you approving every value before it's filled and every click before it's made. Takes the form URL as its argument.
 
 `/reset` is also available, see [Starting over](#starting-over) below.
 
@@ -170,6 +168,11 @@ ai-job-search/
 │   │   ├── interview.md               # /interview stage-specific prep pack + mock interview
 │   │   ├── html-report.md             # /html-report generate application tracker dashboard
 │   │   ├── notion-sync.md             # /notion-sync one-way pipeline view in a Notion database
+│   │   ├── compare.md                 # /compare perk and requirement comparison across postings
+│   │   ├── strengthen-profile.md      # /strengthen-profile LinkedIn + CV completeness advisor
+│   │   ├── explore-roles.md           # /explore-roles surface adjacent roles beyond search queries
+│   │   ├── outreach.md                # /outreach track contacts and draft networking messages
+│   │   ├── fill-form.md               # /fill-form browser-driven application form assistant
 │   │   └── reset.md                   # /reset wipe profile data or documents folder
 │   ├── skills/
 │   │   ├── job-application-assistant/  # Core application skill
@@ -354,7 +357,7 @@ To wipe your profile data and start fresh:
 
 ### Staying up to date
 
-Upstream moves fast. Rather than pulling raw `master` and hoping, update your fork to a tagged [release](../../releases) - a vetted checkpoint described in [CHANGELOG.md](CHANGELOG.md). `python3 tools/check_upstream_updates.py` previews exactly which of your personalized files an update touches before you merge. Full walkthrough in [SETUP.md, section 8](SETUP.md#8-pulling-upstream-updates-into-your-fork).
+Upstream moves fast. Rather than pulling raw `master` and hoping, update your fork to a tagged [release](../../releases) - a vetted checkpoint described in [CHANGELOG.md](CHANGELOG.md). `python3 tools/check_upstream_updates.py` previews exactly which of your personalized files an update touches before you merge. Full walkthrough in [SETUP.md, section 7](SETUP.md#7-pulling-upstream-updates-into-your-fork).
 
 ## Tips for better results
 

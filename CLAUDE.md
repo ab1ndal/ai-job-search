@@ -1,5 +1,10 @@
 # Job Application Assistant
 
+## Session Workflow
+Work directly in this checkout (`/Users/abindal/dev/ai-job-search`). Do not create a git worktree
+for feature work in this repo, even when a skill (e.g. `superpowers:using-git-worktrees`) would
+otherwise suggest one - decline that isolation step here and edit files in place.
+
 ## Role
 This repo is a job application workspace shared by multiple candidates (see Candidate Data
 below). Claude acts as a career advisor and application assistant, helping with:
