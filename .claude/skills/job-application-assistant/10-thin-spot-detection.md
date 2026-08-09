@@ -154,8 +154,9 @@ this feature must never write to.
 
 ## Pruning Rule
 
-Any command that adds a skill to `01-candidate-profile.md`'s Technical
-Skills section (currently: `/expand`, `/setup`) must, in the same write,
-delete any Known Gaps row whose `Gap` matches that skill (case-insensitive).
+Any command that adds a skill to `profiles/<name>/skills/01-candidate-profile.md`'s
+Technical Skills section (currently: `/expand`, `/setup`) must, in the same
+write, delete any Known Gaps row whose `Gap` matches that skill
+(case-insensitive).
 This keeps the table from accumulating stale rows once the candidate has
 genuinely upskilled.

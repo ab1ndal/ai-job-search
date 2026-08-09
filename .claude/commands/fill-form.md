@@ -1,0 +1,184 @@
+# /fill-form - Browser-Driven Application Form Assistant
+
+You are driving a browser through an online application form, page by page, with the candidate approving every value before it's filled and every click before it's made. The candidate has final say at every step — this command proposes, it never decides.
+
+Follow these steps **in order**.
+
+---
+
+## Step 0: Parse Input and Resolve Context
+
+**Profile:** resolve the active candidate profile per `.claude/PROFILES.md` before reading or
+writing anything, and state `Profile: <name>` in the first line of output. `<name>` in the paths
+below is that resolved profile.
+
+`$ARGUMENTS` is the application form URL.
+
+Match the URL (or ask the candidate which tracked application this is) against `profiles/<name>/tracker.csv` to find the company and role this form belongs to. This locates:
+- `profiles/<name>/cv/main_<company>_<role>.pdf` (the compiled PDF, not the `.tex` source) for resume/CV upload fields
+- `profiles/<name>/cover_letters/cover_<company>_<role>.pdf` (likewise the compiled PDF) for cover letter upload fields
+- Any existing form-text `.txt` file from `.claude/skills/job-application-assistant/08-application-forms.md`'s output for this company, for free-text fields
+
+If no tracker match exists, ask the candidate for the company/role this form is for, so file matching still works, and tell them no tracker row will be updated automatically until one exists (Step 6 handles this).
+
+Tell the candidate: "Starting the browser now — I'll show you each page's fields before filling anything, and you'll always confirm before I submit."
+
+---
+
+## Step 1: Start the Session and Snapshot the First Page
+
+```bash
+node .agents/skills/form-filler/cli/src/cli.ts snapshot "<url>"
+```
+
+This launches a visible browser window and returns the page's fields, buttons, and `pageState`.
+
+**If `pageState` is `login_wall`:** stop. Tell the candidate: "This page needs you to log in. Please log in in the browser window that just opened, then tell me when you're on the application form." Wait for their reply, then re-run `snapshot` with no URL argument (reads the current page) before continuing.
+
+**If `pageState` is `captcha`:** stop. Tell the candidate: "This page has a CAPTCHA. Please solve it in the browser window, then tell me when you're past it." Wait for their reply, then re-run `snapshot` with no URL argument before continuing. Never attempt to solve, guess, or script around a CAPTCHA.
+
+**If `pageState` is `form`:** continue to Step 2.
+
+**If `pageState` is `unknown`** (no fields detected, not a login wall or CAPTCHA): show the candidate the screenshot path and ask how to proceed — this is likely an intermediate informational page in a multi-step portal, not an error.
+
+---
+
+## Step 2: Propose Values for This Page's Fields
+
+For each field in the snapshot's `fields` array, propose a value using this sourcing order:
+
+| Field looks like | Source |
+|---|---|
+| Name, email, phone, address | `profiles/<name>/skills/01-candidate-profile.md` Identity section |
+| Education | `01-candidate-profile.md` Education section |
+| Work experience | `01-candidate-profile.md` Professional Experience section |
+| Self-intro / motivation / "tell us about yourself" / project description | The company's existing `.txt` file from `08-application-forms.md`, if one exists for this posting. If none exists, draft it live following `08-application-forms.md`'s rules — same grounding requirement: every claim traceable to `01-candidate-profile.md` + the master CV + `profiles/<name>/PROFILE.md` |
+| A field that doesn't clearly match any of the above | Do not propose a value — flag it to the candidate as unrecognized and ask what it's for |
+
+For any field in `fields` with `type: "file"`: match against `profiles/<name>/cv/main_<company>_<role>.pdf` (resume/CV fields) or `profiles/<name>/cover_letters/cover_<company>_<role>.pdf` (cover letter fields) — always the compiled PDF, never the `.tex` source by filename convention. If no matching file is found, tell the candidate and ask them to point at a file or run `/apply` first for this posting.
+
+Present the full page as a table: field label → proposed value (or "UNRECOGNIZED — please advise" / "FILE: <path> — confirm?"). Ask the candidate to approve, edit, or flag any field before continuing.
+
+---
+
+## Step 3: Fill the Approved Values
+
+Once the candidate approves (with any edits applied):
+
+For text/select/textarea fields, write a JSON file mapping each field's `selector` (from the snapshot) to its approved value, then:
+```bash
+node .agents/skills/form-filler/cli/src/cli.ts fill <path-to-field-map.json>
+```
+
+For file-upload fields, once the candidate confirms the matched file:
+```bash
+node .agents/skills/form-filler/cli/src/cli.ts upload "<selector>" "<file-path>"
+```
+
+---
+
+## Step 4: Advance or Stop at Submit
+
+Look at the page's `buttons` list from the snapshot. `snapshot-extract.ts` has no `isLastPage` or page-count field — finality is never inferred from a button's label or from a subjective read of "does this look like the last page." This step is fail-closed: auto-advance requires an affirmative, checkable signal that more pages follow; anything less routes to the Submit Gate.
+
+**Step 4a — Look for a not-final signal.** Before considering any click, check for one of these two concrete, checkable signals:
+- The snapshot's `headings` array contains a step/progress indicator (e.g. `"Step 1 of 3"`) **and** it shows the current step is before the last one. `headings` is the only place such text appears — it holds the page's short heading-like strings (`h1`–`h3`, ARIA headings, step/progress elements). A step indicator that is not in `headings` does not count, no matter what the screenshot looks like.
+- The candidate has explicitly told you this posting's form has more pages ahead of the current one (e.g. confirmed earlier in this session, or stated in the tracked posting notes).
+
+If **neither** signal is present, skip straight to Step 4c — do not evaluate button text at all.
+
+**Step 4b — Auto-advance (only if a not-final signal was found in 4a):**
+If a not-final signal is present AND a button's text matches Next/Continue/Proceed (case-insensitive):
+```bash
+node .agents/skills/form-filler/cli/src/cli.ts click "<selector>"
+```
+Then run `snapshot` again (no URL argument) to read the new page, and return to Step 2.
+
+**Step 4c — Default to the Submit Gate.** In every other case — a button matching Submit/Apply/Send Application, a step indicator showing the last step, **or no not-final signal found in 4a regardless of what the button is labeled (including "Continue" or "Next")** — treat this as the Submit Gate. Do not click anything as part of this step.
+
+Before continuing to Step 5, classify which gate case applies, based only on the gated button's own text (never on why 4a/4c triggered):
+- **Case 1 — Confirmed-submit label:** the button's text matches Submit/Apply/Send Application, or a step indicator explicitly shows this is the last step.
+- **Case 2 — Ambiguous label:** the button's text is anything else (e.g. "Continue", "Next", "Proceed") and no step indicator confirms finality.
+
+Carry this classification and the exact button text into Step 5.
+
+---
+
+## Step 5: Submit Gate
+
+Branch on the case classification carried from Step 4c.
+
+**Case 1 — Confirmed-submit label:** proceed directly with the submit confirmation below.
+
+**Case 2 — Ambiguous label:** first ask the candidate a question that does not presuppose submission:
+
+> "I can't tell whether the button labeled '<button text>' is the final submit action or just advances to another page. Is this actually the final submit for this application?"
+
+- **If the candidate says it is NOT the final submit** (just an ordinary next-page button): click it as a plain page-advance, do not run `close`, do not touch the tracker, and continue the per-page loop:
+  ```bash
+  node .agents/skills/form-filler/cli/src/cli.ts click "<selector>"
+  ```
+  Then run `snapshot` again (no URL argument) to read the new page, and return to Step 2. Skip the rest of this step and Step 6 entirely.
+- **If the candidate confirms it IS the final submit:** proceed with the submit confirmation below, using the candidate's answer here as the basis for the summary (do not ask a second, redundant confirmation of finality — the submit-value confirmation below still applies).
+
+**Submit confirmation (Case 1, or Case 2 confirmed-final):** show the candidate a summary of every value that was filled across every page of this session (re-read the field maps written in Step 3, or reconstruct from conversation history). Ask explicitly:
+
+> "This will submit the application to <company> for <role>. Everything above is what will be sent. Submit now?"
+
+**Only on an explicit "yes"** (not silence, not a related-but-different confirmation):
+```bash
+node .agents/skills/form-filler/cli/src/cli.ts click "<submit-selector>"
+node .agents/skills/form-filler/cli/src/cli.ts close
+```
+
+**On "no" or any hesitation:** stop. Do not click. Tell the candidate the browser session is still open at that page if they want to review it themselves, and that they can ask to resume submission later (do not run `close` in this case — the candidate may still want to finish manually or ask again).
+
+---
+
+## Step 6: Record the Application
+
+Only after a confirmed submission in Step 5:
+
+1. Read `profiles/<name>/tracker.csv`. If it does not exist, create it with the standard header (identical to `/apply` Step 6b and `/outcome` Step 1.1):
+   ```
+   date,company,sector,role,role_type,channel,status,contact_person,fit_rating,notes,cv_file,cover_letter_file,source
+   ```
+2. Match existing rows case-insensitively on company and role (using the match found or confirmed in Step 0).
+3. **If a matching row exists with status `drafted`:** update it — set `status` to `applied` and overwrite `date` with today (the actual submission date; the `drafted` row's date was the drafting date, not the send date).
+4. **If no matching row exists:** append a new row with `status` `applied`, `date` today, `channel` `online`, `source` the form URL, and `cv_file`/`cover_letter_file` set to the matched files from Step 0 if any were used.
+5. Never restructure the CSV, reorder rows, or touch any other row.
+
+Tell the candidate: "Submitted and recorded in your tracker as applied to <company> — <role>."
+
+---
+
+## Error Handling
+
+Every CLI failure prints `{"error": "...", "code": "..."}` to **stderr** and exits `1`. The codes:
+
+| Code | Meaning | What to do |
+|---|---|---|
+| `NO_URL` | `snapshot` called with no URL and no session to read | Re-run Step 1 with the form URL. |
+| `SNAPSHOT_FAILED` | The browser could not be launched, attached to, or read | Show the candidate the error. A stale session is recovered automatically when a URL is given; otherwise run `close` and restart from Step 1. |
+| `NO_FIELD_MAP` / `BAD_FIELD_MAP` | `fill` got no field-map path, or one that could not be read/parsed | Fix the file this command wrote and retry the same values — never change selectors to work around it. |
+| `FILL_FAILED` | A selector matched nothing, or the field was not fillable | **Stop and ask the candidate.** |
+| `BAD_ARGS` / `FILE_NOT_FOUND` | `upload` got missing arguments, or a path that does not exist | Tell the candidate no matching file was found and ask them to point at one or run `/apply` first. |
+| `UPLOAD_FAILED` | The selector was not a file input, or the browser rejected the file | **Stop and ask the candidate.** |
+| `NO_SELECTOR` / `CLICK_FAILED` | `click` got no selector, or the selector matched nothing | **Stop and ask the candidate.** Never click something else instead. |
+| `BAD_CMD` / `INTERNAL_ERROR` | Unknown subcommand, or an unexpected CLI failure | Surface it verbatim; do not work around it. |
+
+Three rules apply to all of them:
+
+1. **Surface the actual error to the candidate**, verbatim — never a paraphrase that hides what failed.
+2. **Never retry silently.** One failed command is reported, not repeated.
+3. **Never author a selector the snapshot did not return.** Selectors come only from the latest snapshot's `fields`/`buttons`. If one fails, the page has changed or the snapshot is stale — re-snapshot and show the candidate, or stop and ask. Guessing "a slightly different selector" is exactly how a value gets typed into, or a button clicked on, an element the candidate never approved.
+
+---
+
+## Important Rules
+
+1. **Every user-gated step is flagged and left to the candidate.** Login walls, CAPTCHAs, unrecognized fields, and the Submit click are never resolved or clicked by this command on its own judgment — always stop and ask.
+2. **Never click Submit without the explicit gate in Step 5**, even if a page's flow otherwise looks fully auto-advanceable.
+3. **File uploads are always confirmed before uploading**, even when the filename match looks obviously correct.
+4. **The browser stays open until an explicit `close`** (Step 5's success path, or the candidate asking to stop). A "no" at the Submit Gate leaves it open, not closed, since the candidate may want to inspect or finish manually.
+5. **Every field's proposed value must trace to a source** in Step 2's table. A field the command can't source is flagged, never guessed.

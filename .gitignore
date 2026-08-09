@@ -97,6 +97,7 @@ upskill/*.md
 .agents/**/node_modules/
 .agents/**/*.log
 .agents/usage/
+.agents/skills/form-filler/cli/.session/
 
 # Brainstorm mockups (superpowers visual companion) - never ship
 .superpowers/

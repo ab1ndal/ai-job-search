@@ -1,0 +1,25 @@
+{
+  "name": "form-filler-cli",
+  "version": "1.0.0",
+  "description": "CLI for driving a browser through an online job-application form via Playwright, one page at a time, with every field and the final submit confirmed by the candidate before it happens.",
+  "type": "module",
+  "main": "src/cli.ts",
+  "bin": {
+    "form-filler": "src/cli.ts"
+  },
+  "scripts": {
+    "start": "node src/cli.ts",
+    "test": "node --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^22.0.0"
+  }
+}
