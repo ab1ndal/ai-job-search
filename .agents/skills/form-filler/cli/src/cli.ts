@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { runClose } from "./commands/close.js"
+import { runSnapshot } from "./commands/snapshot.js"
 import { writeError } from "./helpers.js"
 
 const HELP = `form-filler-cli — drive a browser through an online application form
@@ -21,6 +22,10 @@ async function main(): Promise<number> {
   if (!cmd || cmd === "--help" || cmd === "-h") {
     process.stdout.write(HELP)
     return cmd ? 0 : 1
+  }
+
+  if (cmd === "snapshot") {
+    return runSnapshot({ url: argv[1] })
   }
 
   if (cmd === "close") {
