@@ -14,20 +14,20 @@ Resolve the active candidate profile per `.claude/PROFILES.md` before reading or
 
 `$ARGUMENTS` may contain:
 
-- `import` -> enter the import branch (Step 1)
-- A company name, e.g. `/outreach acme` -> enter the company lookup branch (Step 2) for that company
-- Nothing -> read `profiles/<name>/tracker.csv`, list every company that has zero rows in `profiles/<name>/contacts.csv` for that company, and ask which to work on. If every tracker company already has at least one contact row, say so and ask if the user wants to re-run lookup on a specific one anyway (new hiring managers may have shown up since).
+- `import` → enter the import branch (Step 1)
+- A company name, e.g. `/outreach acme` → enter the company lookup branch (Step 2) for that company
+- Nothing → read `profiles/<name>/tracker.csv`, list every company that has zero rows in `profiles/<name>/contacts.csv` for that company, and ask which to work on. If every tracker company already has at least one contact row, say so and ask if the user wants to re-run lookup on a specific one anyway (new hiring managers may have shown up since).
 
 ---
 
 ## Step 1: Import LinkedIn Connections (`/outreach import`)
 
-1. Ask the user for the path to their LinkedIn connections export CSV (Settings & Privacy -> "Get a copy of your data" -> Connections; the user generates and downloads this themselves - this command never fetches it for them).
+1. Ask the user for the path to their LinkedIn connections export CSV (Settings & Privacy → "Get a copy of your data" → Connections; the user generates and downloads this themselves - this command never fetches it for them).
 2. Read the CSV and parse headers **by name**, not position: `First Name`, `Last Name`, `Company`, `Position`, and `URL` if present. LinkedIn has changed this export's schema before, so a missing `URL` column leaves `linkedin_url` blank rather than failing the import.
 3. Read `profiles/<name>/tracker.csv` for the list of companies to match against. If it does not exist or has zero rows, stop and tell the user to add target companies first (via `/apply` or a manual tracker row) - there is nothing to match connections to yet.
 4. Normalize company strings on both sides before comparing: lowercase, strip trailing legal suffixes (`inc`, `inc.`, `llc`, `corp`, `corporation`, `ltd`, `co`, `company`), and collapse extra whitespace. This normalization is for comparison only, never for storage: `profiles/<name>/tracker.csv`'s spelling of the company is always canonical. Every write to `profiles/<name>/contacts.csv`'s `company` column uses the tracker's exact spelling (e.g. `Meta`, not the export's `Meta Platforms`), never the export's or a web-search result's spelling.
-   - **Exact normalized match** (e.g. export "Meta" vs tracker "Meta") -> add to `profiles/<name>/contacts.csv` automatically: `company` = the tracker's spelling, `name` = `First Name` + `Last Name`, `title` = `Position`, `relation=connection`, `source=linkedin_export`, `channel` left blank (set on drafting), `status=not_contacted`, `last_contacted` blank, `notes` blank.
-   - **Partial/substring-only match** (e.g. export "Meta Platforms" vs tracker "Meta") -> do not add automatically. Collect these separately and present them to the user after the full pass, as "possible matches - add these?" Add only the ones the user confirms, and when added, write `company` as the tracker's spelling, not the export's.
+   - **Exact normalized match** (e.g. export "Meta" vs tracker "Meta") → add to `profiles/<name>/contacts.csv` automatically: `company` = the tracker's spelling, `name` = `First Name` + `Last Name`, `title` = `Position`, `relation=connection`, `source=linkedin_export`, `channel` left blank (set on drafting), `status=not_contacted`, `last_contacted` blank, `notes` blank.
+   - **Partial/substring-only match** (e.g. export "Meta Platforms" vs tracker "Meta") → do not add automatically. Collect these separately and present them to the user after the full pass, as "possible matches - add these?" Add only the ones the user confirms, and when added, write `company` as the tracker's spelling, not the export's.
 5. Before adding any row, check `profiles/<name>/contacts.csv` for an existing row with the same normalized `(company, name)`. If found, skip and count it as a duplicate - never add a second row for the same person at the same company.
 6. If `profiles/<name>/contacts.csv` does not exist yet, create it with the header: `company,name,title,relation,source,linkedin_url,channel,status,last_contacted,notes`.
    **CSV quoting rule:** any field written to `profiles/<name>/contacts.csv` - here or anywhere else this file is written - that contains a comma, double quote, or newline must be quoted per standard CSV convention (wrap the field in double quotes, double any embedded double quote). Never write a raw newline into a field. `Position` values from the LinkedIn export (e.g. `Engineering Manager, Platform Infrastructure`) and dictated `notes` text routinely contain commas and must be quoted on write; an unquoted comma silently shifts every later column.
@@ -62,7 +62,7 @@ For each contact the user selects for drafting:
 3. **Shape by relation and connection state:**
    - **`relation=connection`** (a person the candidate already knows): warm tone, roughly **60 to 120 words** (matching the hiring-manager-DM length below). Reference the shared context available from the row (`title`, `company`). State interest in opportunities at the company, then ask if they're open to a quick chat or can point to the right person. Never opens with a direct "can you refer me" - that is the second message, not the first, and only if the user reports back that the contact is receptive.
    - **`relation=hiring_manager`, not yet connected**: a LinkedIn connection-request note, hard cap **300 characters**. Name the specific role (from the company's open tracker row if one exists, otherwise the general area the candidate is targeting), one concrete qualifying line, low-pressure close.
-   - **`relation=hiring_manager`, already connected**: a DM in the same shape as `/outcome followup`'s note - **60 to 120 words**, one interest line, one concrete value line sourced per Step 3.1, one specific ask (a short chat, or advice on how to get considered for the role). No "just checking in" filler. Determine "already connected" only by explicitly asking the user ("Are you already connected to `<name>` on LinkedIn?") if unsure, or if the row's `channel` already equals `linkedin_dm` (a DM was already sent previously, which only happens after an accepted-connection exchange). **Never infer this from `channel=connection_request`** - that value means a connection request was *sent*, not accepted, and picking this branch on that alone would wrongly skip the connection-request note for someone who never accepted.
+   - **`relation=hiring_manager`, already connected**: a DM in the same shape as `/outcome followup`'s note - **60 to 120 words**, one interest line, one concrete value line sourced per Step 3.1, one specific ask (a short chat, or advice on how to get considered for the role). No "just checking in" filler. Determine "already connected" only by explicitly asking the user ("Are you already connected to `<name>` on LinkedIn?"). **Never infer this from `channel`** - that value means a connection request was *sent*, not accepted, and picking this branch on that alone would wrongly skip the connection-request note for someone who never accepted.
 4. Present the draft and iterate with the user until they're happy. If the user asks for a different channel (e.g. email instead of LinkedIn DM) and an email address was shared during this conversation, redraft for that channel; otherwise say the channel isn't available for this contact. `profiles/<name>/contacts.csv` has no email column and is never a source of an email address - email as a channel only works when the user provides one directly, in the current conversation.
 5. **Draft only, never send.** This command produces text for the user to send themselves. It never emails, messages, or submits anything on their behalf, and must not be wired to any tool that does.
 
@@ -73,9 +73,9 @@ For each contact the user selects for drafting:
 Once the user confirms they will send the draft (or have already sent it) - in the same turn, since an unlogged send breaks the next run's "hear back yet?" check in Step 2.2:
 
 1. Update the contact's row in `profiles/<name>/contacts.csv`:
-   - `status` -> `messaged`
-   - `channel` -> whichever was drafted: `connection_request`, `linkedin_dm`, or `email`
-   - `last_contacted` -> today's date
+   - `status` → `messaged`
+   - `channel` → whichever was drafted: `connection_request`, `linkedin_dm`, or `email`
+   - `last_contacted` → today's date
    - Append `messaged YYYY-MM-DD` to `notes` (append, never overwrite prior notes)
 2. Save the final sent text to `profiles/<name>/documents/contacts/<company>/<name>_YYYY-MM-DD.md`, creating the `profiles/<name>/documents/contacts/<company>/` directory if it does not already exist.
 3. If the user decides not to send it, log nothing and leave the row at `status=not_contacted`.
@@ -83,6 +83,8 @@ Once the user confirms they will send the draft (or have already sent it) - in t
 ---
 
 ## Step 5: Confirm
+
+Applies to the company-lookup branch (Steps 2-4) only - the import branch (Step 1) has its own summary (Step 1.7) and does not also emit this block.
 
 Summarize what happened this run:
 
