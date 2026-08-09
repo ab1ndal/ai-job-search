@@ -20,6 +20,9 @@ documents/
 │       ├── cover_letter.tex     # The cover letter you submitted
 │       ├── cv_draft.tex         # The CV variant you submitted
 │       └── outcome.md           # Result + notes (fill in after hearing back)
+├── contacts/                    # Per-company outreach draft archive, written by /outreach
+│   └── <company>/
+│       └── <name>_<date>.md     # Final sent text for one contact, one outreach message
 └── README.md                    # This file
 ```
 
